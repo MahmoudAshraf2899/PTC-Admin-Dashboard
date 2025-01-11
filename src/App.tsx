@@ -18,6 +18,9 @@ import Buttons from './pages/UiElements/Buttons';
 import DefaultLayout from './layout/DefaultLayout';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { HeroSection } from './pages/HeroSection/HeroSection';
+import GuaranteeSection from './pages/GuaranteeSection/GuaranteeSection';
+import AdSection from './pages/AdSection/AdSection';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -57,11 +60,29 @@ function App() {
             }
           />
           <Route
-            path="/calendar"
+            path="/Hero-section"
             element={
               <>
-                <PageTitle title="Calendar | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-                <Calendar />
+                <PageTitle title="Hero Section | PTC - Admin Dashboard" />
+                <HeroSection />
+              </>
+            }
+          />
+          <Route
+            path="/Guarantee-Section"
+            element={
+              <>
+                <PageTitle title="Guarantee Section | PTC - Admin Dashboard" />
+                <GuaranteeSection />
+              </>
+            }
+          />
+          <Route
+            path="/Ad-Section"
+            element={
+              <>
+                <PageTitle title="Ad Section | PTC - Admin Dashboard" />
+                <AdSection />
               </>
             }
           />

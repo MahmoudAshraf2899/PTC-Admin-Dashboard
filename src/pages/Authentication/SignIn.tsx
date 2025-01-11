@@ -33,17 +33,18 @@ const SignIn: React.FC = () => {
         if (response) {
           let userType = 1;
 
-          localStorage.setItem('token', response.data.accessToken);
-          localStorage.setItem('fullName', response.data.fullName);
-          localStorage.setItem('id', response.data.id);
+          localStorage.setItem('token', response.data.data.accessToken);
+          localStorage.setItem('fullName', response.data.data.fullName);
+          localStorage.setItem('id', response.data.data.id);
           auth?.login(userType);
 
           setIsLoading(false);
           navigate('/');
+          window.location.reload();
         } else {
           localStorage.clear();
           setIsLoading(false);
-          toast.error('يرجي ادخال رقم هاتف  وكلمة مرور صحيحة');
+          toast.error('something went wrong');
         }
       })
       .catch((error) => {

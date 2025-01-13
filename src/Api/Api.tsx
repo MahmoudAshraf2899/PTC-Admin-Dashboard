@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { toast } from 'react-toastify';
+
 const token = localStorage.getItem('token');
-console.log('🚀 ~ token:', token);
 
 export const URL = 'https://localhost:7040/';
 
@@ -27,7 +28,6 @@ export const APISUBMIT = axios.create({
     'Access-Control-Allow-Origin': URL,
   },
 });
-console.log('🚀 ~ token:', token);
 
 API.interceptors.response.use(
   (response) => response,
@@ -42,7 +42,11 @@ API.interceptors.response.use(
         console.log(error);
 
         return Promise.reject(error.response.data || error);
+      } else if (error.response.status === 404) {
+        return Promise.reject(error.response.data || error);
       }
+    } else {
+      return;
     }
   },
 );

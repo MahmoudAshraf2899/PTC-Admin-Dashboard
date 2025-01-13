@@ -33,6 +33,17 @@ const validationSchema = Yup.object().shape({
 export const HeroSection = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [apiResponse, setApiResponse] = useState<ApiResponse | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [subFile, setSubFile] = useState<File | null>(null);
+  const [imageUploadWrapClass, setImageUploadWrapClass] =
+    useState('image-upload-wrap');
+  const [fileUploadContentVisible, setFileUploadContentVisible] =
+    useState(false);
+  const [subFileUploadContentVisible, setSubFileUploadContentVisible] =
+    useState(false);
+  const [showOldMainImage, setShowOldMainImage] = useState<boolean>(true);
+  const [showOldSubImage, setShowOldSubImage] = useState<boolean>(true);
+
   useEffect(() => {
     API.get(`${END_POINTS.GET_HERO_SECTION}/1`).then((res) => {
       if (res.status == 200) {
@@ -72,6 +83,53 @@ export const HeroSection = () => {
       setApiResponse(updatedApiResponse);
     }
   };
+
+  const removeUpload = () => {
+    setFile(null);
+    setImageUploadWrapClass('image-upload-wrap');
+    setFileUploadContentVisible(false);
+    setShowOldMainImage(false); // Hide the old main image
+  };
+  const readURL = (input: any) => {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        setImageUploadWrapClass('image-upload-wrap image-dropping');
+        setFileUploadContentVisible(true);
+        setFile(input.files[0]);
+      };
+
+      reader.readAsDataURL(input.files[0]);
+    } else {
+      removeUpload();
+    }
+  };
+
+  const readSubImageURL = (input: any) => {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        setImageUploadWrapClass('image-upload-wrap image-dropping');
+        setSubFileUploadContentVisible(true);
+        setSubFile(input.files[0]);
+      };
+
+      reader.readAsDataURL(input.files[0]);
+    } else {
+      removeUpload();
+    }
+  };
+
+  const handleDragOver = () => {
+    setImageUploadWrapClass('image-upload-wrap image-dropping');
+  };
+
+  const handleDragLeave = () => {
+    setImageUploadWrapClass('image-upload-wrap');
+  };
+
   return (
     <>
       <Breadcrumb pageName="Hero Section" />
@@ -184,7 +242,7 @@ export const HeroSection = () => {
                           value={values.subTitleDescription}
                         />
                       </div>
-
+                      {/* Is Active */}
                       <div className="mt-5 mb-4.5 flex items-center flex-col gap-6 xl:flex-row">
                         <label
                           htmlFor="isActive"
@@ -231,7 +289,8 @@ export const HeroSection = () => {
                           <p>Is Active</p>
                         </label>
                       </div>
-                      {/* Main Image */}
+
+                      {/* Old Main Image Preview */}
                       <div className="mb-4 flex items-center gap-3">
                         <div className="h-14 w-14 rounded-full">
                           <a
@@ -274,24 +333,110 @@ export const HeroSection = () => {
                               </g>
                             </svg>
                           </a>
-                          {/* <img src={userThree} alt="User" /> */}
                         </div>
                         <div>
                           <span className="mb-1.5 text-black dark:text-white">
-                            Edit your Main Image
+                            Update Main Image
                           </span>
                           <span className="flex gap-2.5">
-                            <button className="text-sm hover:text-primary">
-                              Delete
-                            </button>
-                            <button className="text-sm hover:text-primary">
-                              Update
-                            </button>
+                            {showOldMainImage && (
+                              <button
+                                className="text-sm hover:text-primary"
+                                onClick={() => setShowOldMainImage(false)}
+                              >
+                                Delete
+                              </button>
+                            )}
                           </span>
                         </div>
                       </div>
 
-                      {/* Sub Image */}
+                      {showOldMainImage && (
+                        <>
+                          <div className="w-f mb-5.5 block">
+                            <div className="mb-3">
+                              <div className="file-upload-content">
+                                <img
+                                  id="oldMainImage"
+                                  className="file-upload-image"
+                                  src={BaseURL.Base + values.mainImage}
+                                  alt="your"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+
+                      {/* Upload Image */}
+                      {!showOldMainImage && (
+                        <>
+                          <div className="relative mb-5.5 block w-full cursor-pointer appearance-none rounded border border-dashed border-primary bg-gray py-4 px-4 dark:bg-meta-4 sm:py-7.5">
+                            <input
+                              onDragOver={() => handleDragOver()}
+                              onDragLeave={() => handleDragLeave()}
+                              className="absolute inset-0 z-50 m-0 h-full w-full cursor-pointer p-0 opacity-0 outline-none"
+                              type="file"
+                              onChange={(e) => readURL(e.target)}
+                              accept="image/*"
+                            />
+                            <div className="flex flex-col items-center justify-center space-y-3">
+                              <span className="flex h-10 w-10 items-center justify-center rounded-full border border-stroke bg-white dark:border-strokedark dark:bg-boxdark">
+                                <svg
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 16 16"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    clipRule="evenodd"
+                                    d="M1.99967 9.33337C2.36786 9.33337 2.66634 9.63185 2.66634 10V12.6667C2.66634 12.8435 2.73658 13.0131 2.8616 13.1381C2.98663 13.2631 3.1562 13.3334 3.33301 13.3334H12.6663C12.8431 13.3334 13.0127 13.2631 13.1377 13.1381C13.2628 13.0131 13.333 12.8435 13.333 12.6667V10C13.333 9.63185 13.6315 9.33337 13.9997 9.33337C14.3679 9.33337 14.6663 9.63185 14.6663 10V12.6667C14.6663 13.1971 14.4556 13.7058 14.0806 14.0809C13.7055 14.456 13.1968 14.6667 12.6663 14.6667H3.33301C2.80257 14.6667 2.29387 14.456 1.91879 14.0809C1.54372 13.7058 1.33301 13.1971 1.33301 12.6667V10C1.33301 9.63185 1.63148 9.33337 1.99967 9.33337Z"
+                                    fill="#3C50E0"
+                                  />
+                                  <path
+                                    fillRule="evenodd"
+                                    clipRule="evenodd"
+                                    d="M7.5286 1.52864C7.78894 1.26829 8.21106 1.26829 8.4714 1.52864L11.8047 4.86197C12.0651 5.12232 12.0651 5.54443 11.8047 5.80478C11.5444 6.06513 11.1223 6.06513 10.8619 5.80478L8 2.94285L5.13807 5.80478C4.87772 6.06513 4.45561 6.06513 4.19526 5.80478C3.93491 5.54443 3.93491 5.12232 4.19526 4.86197L7.5286 1.52864Z"
+                                    fill="#3C50E0"
+                                  />
+                                  <path
+                                    fillRule="evenodd"
+                                    clipRule="evenodd"
+                                    d="M7.99967 1.33337C8.36786 1.33337 8.66634 1.63185 8.66634 2.00004V10C8.66634 10.3682 8.36786 10.6667 7.99967 10.6667C7.63148 10.6667 7.33301 10.3682 7.33301 10V2.00004C7.33301 1.63185 7.63148 1.33337 7.99967 1.33337Z"
+                                    fill="#3C50E0"
+                                  />
+                                </svg>
+                              </span>
+                              <p>
+                                <span className="text-primary">
+                                  Click to upload
+                                </span>{' '}
+                                or drag and drop
+                              </p>
+                              <p className="mt-1.5">SVG, PNG, JPG or GIF</p>
+                              <p>(max, 800 X 800px)</p>
+                            </div>
+                          </div>
+                          {/* New Uploaded Photo Preview */}
+                          <div className="w-f mb-5.5 block">
+                            {fileUploadContentVisible && file && (
+                              <div className="mb-3">
+                                <div className="file-upload-content">
+                                  <img
+                                    className="file-upload-image"
+                                    src={URL.createObjectURL(file)}
+                                    alt="your"
+                                  />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      )}
+
+                      {/* Old Sub Image Preview */}
                       <div className="mb-4 flex items-center gap-3">
                         <div className="h-14 w-14 rounded-full">
                           <a
@@ -337,18 +482,105 @@ export const HeroSection = () => {
                         </div>
                         <div>
                           <span className="mb-1.5 text-black dark:text-white">
-                            Edit your Sub Image
+                            Update Sub Image
                           </span>
                           <span className="flex gap-2.5">
-                            <button className="text-sm hover:text-primary">
-                              Delete
-                            </button>
-                            <button className="text-sm hover:text-primary">
-                              Update
-                            </button>
+                            {showOldSubImage && (
+                              <button
+                                className="text-sm hover:text-primary"
+                                onClick={() => setShowOldSubImage(false)}
+                              >
+                                Delete
+                              </button>
+                            )}
                           </span>
                         </div>
                       </div>
+
+                      {showOldSubImage && (
+                        <>
+                          <div className="w-f mb-5.5 block">
+                            <div className="mb-3">
+                              <div className="file-upload-content">
+                                <img
+                                  id="oldMainImage"
+                                  className="file-upload-image"
+                                  src={BaseURL.Base + values.subImage}
+                                  alt="your"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+
+                      {/* Upload Image */}
+                      {!showOldSubImage && (
+                        <>
+                          <div className="relative mb-5.5 block w-full cursor-pointer appearance-none rounded border border-dashed border-primary bg-gray py-4 px-4 dark:bg-meta-4 sm:py-7.5">
+                            <input
+                              onDragOver={() => handleDragOver()}
+                              onDragLeave={() => handleDragLeave()}
+                              className="absolute inset-0 z-50 m-0 h-full w-full cursor-pointer p-0 opacity-0 outline-none"
+                              type="file"
+                              onChange={(e) => readSubImageURL(e.target)}
+                              accept="image/*"
+                            />
+                            <div className="flex flex-col items-center justify-center space-y-3">
+                              <span className="flex h-10 w-10 items-center justify-center rounded-full border border-stroke bg-white dark:border-strokedark dark:bg-boxdark">
+                                <svg
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 16 16"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    clipRule="evenodd"
+                                    d="M1.99967 9.33337C2.36786 9.33337 2.66634 9.63185 2.66634 10V12.6667C2.66634 12.8435 2.73658 13.0131 2.8616 13.1381C2.98663 13.2631 3.1562 13.3334 3.33301 13.3334H12.6663C12.8431 13.3334 13.0127 13.2631 13.1377 13.1381C13.2628 13.0131 13.333 12.8435 13.333 12.6667V10C13.333 9.63185 13.6315 9.33337 13.9997 9.33337C14.3679 9.33337 14.6663 9.63185 14.6663 10V12.6667C14.6663 13.1971 14.4556 13.7058 14.0806 14.0809C13.7055 14.456 13.1968 14.6667 12.6663 14.6667H3.33301C2.80257 14.6667 2.29387 14.456 1.91879 14.0809C1.54372 13.7058 1.33301 13.1971 1.33301 12.6667V10C1.33301 9.63185 1.63148 9.33337 1.99967 9.33337Z"
+                                    fill="#3C50E0"
+                                  />
+                                  <path
+                                    fillRule="evenodd"
+                                    clipRule="evenodd"
+                                    d="M7.5286 1.52864C7.78894 1.26829 8.21106 1.26829 8.4714 1.52864L11.8047 4.86197C12.0651 5.12232 12.0651 5.54443 11.8047 5.80478C11.5444 6.06513 11.1223 6.06513 10.8619 5.80478L8 2.94285L5.13807 5.80478C4.87772 6.06513 4.45561 6.06513 4.19526 5.80478C3.93491 5.54443 3.93491 5.12232 4.19526 4.86197L7.5286 1.52864Z"
+                                    fill="#3C50E0"
+                                  />
+                                  <path
+                                    fillRule="evenodd"
+                                    clipRule="evenodd"
+                                    d="M7.99967 1.33337C8.36786 1.33337 8.66634 1.63185 8.66634 2.00004V10C8.66634 10.3682 8.36786 10.6667 7.99967 10.6667C7.63148 10.6667 7.33301 10.3682 7.33301 10V2.00004C7.33301 1.63185 7.63148 1.33337 7.99967 1.33337Z"
+                                    fill="#3C50E0"
+                                  />
+                                </svg>
+                              </span>
+                              <p>
+                                <span className="text-primary">
+                                  Click to upload
+                                </span>{' '}
+                                or drag and drop
+                              </p>
+                              <p className="mt-1.5">SVG, PNG, JPG or GIF</p>
+                              <p>(max, 800 X 800px)</p>
+                            </div>
+                          </div>
+                          {/* New Uploaded Photo Preview */}
+                          <div className="w-f mb-5.5 block">
+                            {subFileUploadContentVisible && subFile && (
+                              <div className="mb-3">
+                                <div className="file-upload-content">
+                                  <img
+                                    className="file-upload-image"
+                                    src={URL.createObjectURL(subFile)}
+                                    alt="your"
+                                  />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      )}
 
                       <button className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90">
                         Save

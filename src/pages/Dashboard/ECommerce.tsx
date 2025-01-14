@@ -1,11 +1,36 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import CardDataStats from '../../components/CardDataStats';
+import API from '../../Api/Api';
+import { END_POINTS } from '../../constants/ApiConstant';
+import { BaseURL } from '../../constants/Bases.js';
+import Loader from '../../common/Loader';
 
+interface ApiResponse {
+  totalConstructions: Number;
+  totalDevelopments: Number;
+  totalUsers: Number;
+}
 const ECommerce: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [apiResponse, setApiResponse] = useState<ApiResponse | null>(null);
+  useEffect(() => {
+    setIsLoading(true);
+    API.get(`${END_POINTS.DASHBOARD_STATISTICS}`).then((res) => {
+      if (res.status == 200) {
+        setApiResponse(res.data.data);
+
+        setIsLoading(false);
+      }
+    });
+  }, []);
   return (
     <>
+      {isLoading && <Loader />}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-1 2xl:gap-7.5">
-        <CardDataStats title="Total Constructions Projects" total="75">
+        <CardDataStats
+          title="Total Constructions Projects"
+          total={`${apiResponse?.totalConstructions.toString()}`}
+        >
           <svg
             className="fill-primary dark:fill-white"
             width="22"
@@ -24,7 +49,10 @@ const ECommerce: React.FC = () => {
             />
           </svg>
         </CardDataStats>
-        <CardDataStats title="Total Development Projects" total="25">
+        <CardDataStats
+          title="Total Development Projects"
+          total={`${apiResponse?.totalDevelopments.toString()}`}
+        >
           <svg
             className="fill-primary dark:fill-white"
             width="20"
@@ -48,7 +76,10 @@ const ECommerce: React.FC = () => {
           </svg>
         </CardDataStats>
 
-        <CardDataStats title="Total Users" total="5">
+        <CardDataStats
+          title="Total Users"
+          total={`${apiResponse?.totalUsers.toString()}`}
+        >
           <svg
             className="fill-primary dark:fill-white"
             width="22"

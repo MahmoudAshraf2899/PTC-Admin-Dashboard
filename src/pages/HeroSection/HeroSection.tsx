@@ -133,7 +133,7 @@ export const HeroSection = () => {
   return (
     <>
       <Breadcrumb pageName="Hero Section" />
-
+      {isLoading ? <Loader /> : null}
       <div className="grid grid-cols-1 gap-9 sm:grid-cols-2">
         <div className="flex flex-col gap-9 col-span-full">
           {/* <!-- Contact Form --> */}

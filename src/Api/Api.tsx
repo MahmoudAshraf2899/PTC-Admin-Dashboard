@@ -1,9 +1,10 @@
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { BaseURL } from '../constants/Bases.js';
 
 const token = localStorage.getItem('token');
 
-export const URL = 'https://localhost:7040/';
+export const URL = BaseURL.SmarterAspNetBase;
 
 const API = axios.create({
   baseURL: URL,

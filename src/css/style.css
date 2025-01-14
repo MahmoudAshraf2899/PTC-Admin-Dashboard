@@ -350,3 +350,12 @@ span.flatpickr-weekday,
     background: rgba(112, 212, 75, 0.05);
     backdrop-filter: blur(1px);
   }
+  .table>thead>tr>th {
+    background-color: #036464;
+  }
+  .table>thead>tr :not(.th:first-child,.th:last-child){
+    border-color: inherit;
+  }
+  .search-btn{
+    background-color: #007c74;
+  }

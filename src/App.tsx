@@ -21,6 +21,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { HeroSection } from './pages/HeroSection/HeroSection';
 import GuaranteeSection from './pages/GuaranteeSection/GuaranteeSection';
 import AdSection from './pages/AdSection/AdSection';
+import Projects from './pages/projects/Projects';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -83,6 +84,16 @@ function App() {
               <>
                 <PageTitle title="Ad Section | PTC - Admin Dashboard" />
                 <AdSection />
+              </>
+            }
+          />
+
+          <Route
+            path="/projects"
+            element={
+              <>
+                <PageTitle title="Projects | PTC - Admin Dashboard" />
+                <Projects />
               </>
             }
           />

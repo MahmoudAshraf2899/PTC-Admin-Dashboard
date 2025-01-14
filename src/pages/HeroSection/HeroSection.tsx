@@ -294,7 +294,9 @@ export const HeroSection = () => {
                       <div className="mb-4 flex items-center gap-3">
                         <div className="h-14 w-14 rounded-full">
                           <a
-                            href={BaseURL.Base + apiResponse?.mainImage}
+                            href={
+                              BaseURL.SmarterAspNetBase + apiResponse?.mainImage
+                            }
                             target="_blank"
                           >
                             <svg
@@ -359,7 +361,9 @@ export const HeroSection = () => {
                                 <img
                                   id="oldMainImage"
                                   className="file-upload-image"
-                                  src={BaseURL.Base + values.mainImage}
+                                  src={
+                                    BaseURL.SmarterAspNetBase + values.mainImage
+                                  }
                                   alt="your"
                                 />
                               </div>
@@ -440,7 +444,9 @@ export const HeroSection = () => {
                       <div className="mb-4 flex items-center gap-3">
                         <div className="h-14 w-14 rounded-full">
                           <a
-                            href={BaseURL.Base + apiResponse?.subImage}
+                            href={
+                              BaseURL.SmarterAspNetBase + apiResponse?.subImage
+                            }
                             target="_blank"
                           >
                             <svg
@@ -505,7 +511,9 @@ export const HeroSection = () => {
                                 <img
                                   id="oldMainImage"
                                   className="file-upload-image"
-                                  src={BaseURL.Base + values.subImage}
+                                  src={
+                                    BaseURL.SmarterAspNetBase + values.subImage
+                                  }
                                   alt="your"
                                 />
                               </div>

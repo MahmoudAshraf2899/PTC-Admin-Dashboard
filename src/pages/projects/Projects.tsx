@@ -6,6 +6,7 @@ import { END_POINTS } from '../../constants/ApiConstant';
 import Loader from '../../common/Loader';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb.js';
 import Pagination from '../../common/paginator/Pagination.js';
+import { useNavigate } from 'react-router-dom';
 
 interface ApiResponse {
   id: Number;
@@ -20,6 +21,8 @@ interface ApiResponse {
 }
 
 const Projects: React.FC = () => {
+  const navigate = useNavigate();
+
   const [isLoading, setIsLoading] = useState(false);
   const [project, setProjects] = useState<ApiResponse[]>([]);
   const [searchTitle, setSearchTitle] = useState('');
@@ -151,21 +154,31 @@ const Projects: React.FC = () => {
     <>
       <Breadcrumb pageName="Projects" />
       {isLoading && <Loader />}
-
-      <div className="search-bar flex items-center mb-4 gap-4">
-        <input
-          type="text"
-          className="w-1/4 rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-          placeholder="Search by title"
-          value={searchTitle}
-          onChange={(e) => setSearchTitle(e.target.value)}
-        />
-        <button
-          className="inline-flex items-center justify-center search-btn py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
-          onClick={handleSearch}
-        >
-          Search
-        </button>
+      <div className="grid grid-cols-2">
+        <div className="col-start-1 search-bar flex items-center mb-4 gap-4">
+          <input
+            type="text"
+            className="w-1/4 rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            placeholder="Search by title"
+            value={searchTitle}
+            onChange={(e) => setSearchTitle(e.target.value)}
+          />
+          <button
+            className="inline-flex items-center justify-center search-btn py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+            onClick={handleSearch}
+          >
+            Search
+          </button>
+        </div>
+        <div className="col-start-2 flex justify-end mb-3">
+          <button
+            className="inline-flex items-center justify-center search-btn py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
+            type="button"
+            onClick={() => navigate('/AddProject')}
+          >
+            Add New Project
+          </button>
+        </div>
       </div>
 
       <table {...getTableProps()} className="table bg-inherit mb-10">

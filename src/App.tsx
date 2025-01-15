@@ -22,6 +22,7 @@ import { HeroSection } from './pages/HeroSection/HeroSection';
 import GuaranteeSection from './pages/GuaranteeSection/GuaranteeSection';
 import AdSection from './pages/AdSection/AdSection';
 import Projects from './pages/projects/Projects';
+import AddProject from './pages/projects/AddProject';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -94,6 +95,15 @@ function App() {
               <>
                 <PageTitle title="Projects | PTC - Admin Dashboard" />
                 <Projects />
+              </>
+            }
+          />
+          <Route
+            path="/AddProject"
+            element={
+              <>
+                <PageTitle title="Add Project | PTC - Admin Dashboard" />
+                <AddProject />
               </>
             }
           />

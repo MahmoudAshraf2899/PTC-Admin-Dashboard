@@ -29,6 +29,7 @@ const AddProject: React.FC = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [mainImageUID, setMainImageUID] = useState('');
+  const [projectTypeId, setProjectTypeId] = useState('1');
 
   const [mainFile, setMainFile] = useState<File | null>(null);
   const [imageUploadWrapClass, setImageUploadWrapClass] =
@@ -45,8 +46,7 @@ const AddProject: React.FC = () => {
     description: '',
     projectTypeId: '',
     mainImage: '',
-    mainImageTitle: '',
-    mainPage: '',
+    mainPage: false,
   });
 
   useEffect(() => {}, []);
@@ -119,93 +119,192 @@ const AddProject: React.FC = () => {
   const handleDragLeave = () => {
     setImageUploadWrapClass('image-upload-wrap');
   };
-  const handleChangeValues = (value: any, fieldName: string) => {
-    // Update addObject with the new value
+  const handleChangeValues = (value: boolean | string, fieldName: string) => {
     setAddObject((prevState) => ({
       ...prevState,
       [fieldName]: value,
     }));
   };
+  // const handleAddProject = async (values: any) => {
+  //   setIsLoading(true);
+  //   // First Call Add Media End Point
+  //   for (let i = 0; i < files.length; i++) {
+  //     const formData = new FormData();
+  //     formData.append('file', files[i].file);
+  //     const data = {
+  //       File: files[i].file,
+  //       MediaType: files[i].file.type == 'image/png' ? 1 : 2,
+  //       Directory: 8,
+  //     };
+  //     axios
+  //       .post(`${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`, data, {
+  //         headers: {
+  //           Authorization: `Bearer ${localStorage.getItem('token')}`,
+  //           'Content-Type': 'multipart/form-data',
+  //         },
+  //       })
+  //       .then((res) => {
+  //         if (res.status === 200) {
+  //           setMediaUID((prevArray) => [...prevArray, res.data.id]);
+  //         }
+  //       })
+  //       .catch((error) => {});
+  //   }
+  //   //Add Main Image End Point
+  //   const data = {
+  //     File: mainFile,
+  //     MediaType: 1,
+  //     Directory: 8,
+  //   };
+  //   axios
+  //     .post(`${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`, data, {
+  //       headers: {
+  //         Authorization: `Bearer ${localStorage.getItem('token')}`,
+  //         'Content-Type': 'multipart/form-data',
+  //       },
+  //     })
+  //     .then((res) => {
+  //       if (res.status === 200) {
+  //         setMainImageUID(res.data.id);
+  //       }
+  //     })
+  //     .catch((error) => {});
+  //   //Second Call Add Project End Point
+  //   let requestObject: {
+  //     title: string;
+  //     description: string;
+  //     projectTypeId: string;
+  //     mainImage: string;
+  //     mainImageTitle: string;
+  //     mainPage: string;
+  //     media: { uid: string }[];
+  //   } = {
+  //     title: values.title,
+  //     description: values.description,
+  //     projectTypeId: projectTypeId,
+  //     mainImage: mainImageUID,
+  //     mainImageTitle: values.mainImageTitle,
+  //     mainPage: values.mainPage,
+  //     media: mediaUID.map((uid) => ({ uid })),
+  //   };
+  //   let response2: any;
+  //   response2 = axios.post(
+  //     `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_PROJECT}`,
+  //     requestObject,
+  //     {
+  //       headers: {
+  //         Authorization: `Bearer ${localStorage.getItem('token')}`,
+  //         'Content-Type': 'application/json',
+  //       },
+  //     },
+  //   );
+
+  //   // API.post(`api/admin/Visit`, requestObject)
+  //   //   .then((res: any) => {
+  //   //     if (res.status === 200) {
+  //   //       toast.success('Operation completed successfully');
+  //   //       navigate(-1);
+  //   //       setIsLoading(false);
+  //   //     } else {
+  //   //       toast.error('Something went wrong ..!');
+  //   //       setIsLoading(false);
+  //   //     }
+  //   //   })
+  //   //   .catch((error) => {
+  //   //     toast.error('Something went wrong ..!');
+  //   //     console.log(error);
+  //   //     setIsLoading(false);
+  //   //   });
+  // };
   const handleAddProject = async (values: any) => {
     setIsLoading(true);
-    // First Call Add Media End Point
-    for (let i = 0; i < files.length; i++) {
-      const formData = new FormData();
-      formData.append('file', files[i].file);
-      const data = {
-        File: files[i].file,
-        MediaType: files[i].file.type == 'image/png' ? 1 : 2,
+
+    try {
+      const mediaUIDs: string[] = [];
+
+      // First: Upload all media files
+      for (let i = 0; i < files.length; i++) {
+        const formData = new FormData();
+        formData.append('file', files[i].file);
+        const data = {
+          File: files[i].file,
+          MediaType: files[i].file.type === 'image/png' ? 1 : 2,
+          Directory: 8,
+        };
+
+        const mediaResponse = await axios.post(
+          `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`,
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              'Content-Type': 'multipart/form-data',
+            },
+          },
+        );
+
+        if (mediaResponse.status === 200) {
+          mediaUIDs.push(mediaResponse.data.id);
+        }
+      }
+
+      // Second: Upload the main image
+      const mainImageData = {
+        File: mainFile,
+        MediaType: 1,
         Directory: 8,
       };
-      axios
-        .post(`${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`, data, {
+
+      const mainImageResponse = await axios.post(
+        `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`,
+        mainImageData,
+        {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
             'Content-Type': 'multipart/form-data',
           },
-        })
-        .then((res) => {
-          if (res.status === 200) {
-            setMediaUID((prevArray) => [...prevArray, res.data.id]);
-          }
-        })
-        .catch((error) => {});
-    }
-    const data = {
-      File: mainFile,
-      MediaType: 1,
-      Directory: 8,
-    };
-    axios
-      .post(`${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`, data, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'multipart/form-data',
         },
-      })
-      .then((res) => {
-        if (res.status === 200) {
-          setMainImageUID(res.data.id);
-        }
-      })
-      .catch((error) => {});
-    //Second Call Add Project End Point
+      );
 
-    let requestObject: {
-      title: string;
-      description: string;
-      projectTypeId: string;
-      mainImage: string;
-      mainImageTitle: string;
-      mainPage: string;
-      media: { uid: string }[];
-    } = {
-      title: values.title,
-      description: values.description,
-      projectTypeId: values.projectTypeId,
-      mainImage: mainImageUID,
-      mainImageTitle: values.mainImageTitle,
-      mainPage: values.mainPage,
-      media: mediaUID.map((uid) => ({ uid })),
-    };
-    console.log('🚀 ~ handleAddProject ~ requestObject:', requestObject);
+      let mainImageUID = '';
+      if (mainImageResponse.status === 200) {
+        mainImageUID = mainImageResponse.data.id;
+      }
 
-    // API.post(`api/admin/Visit`, requestObject)
-    //   .then((res: any) => {
-    //     if (res.status === 200) {
-    //       toast.success('Operation completed successfully');
-    //       navigate(-1);
-    //       setIsLoading(false);
-    //     } else {
-    //       toast.error('Something went wrong ..!');
-    //       setIsLoading(false);
-    //     }
-    //   })
-    //   .catch((error) => {
-    //     toast.error('Something went wrong ..!');
-    //     console.log(error);
-    //     setIsLoading(false);
-    //   });
+      // Third: Add the project
+      const requestObject = {
+        title: values.title,
+        description: values.description,
+        projectTypeId: projectTypeId,
+        mainImage: mainImageUID,
+
+        mainPage: values.mainPage,
+        media: mediaUIDs.map((uid) => ({ uid })),
+      };
+
+      const projectResponse = await axios.post(
+        `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_PROJECT}`,
+        requestObject,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      if (projectResponse.status === 200) {
+        toast.success('Operation completed successfully');
+        navigate(-1);
+      } else {
+        toast.error('Something went wrong ..!');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('An error occurred while processing your request.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -285,17 +384,18 @@ const AddProject: React.FC = () => {
                           Project Type
                           <br />
                         </label>
-                        <select className="select select-block text-slate-500  border-none bg-slate-200">
-                          <option>Constructions</option>
-                          <option>Developments</option>
+
+                        <select
+                          className="select select-block text-slate-500  border-none bg-slate-200"
+                          onChange={(e) => setProjectTypeId(e.target.value)}
+                        >
+                          <option value="1">Constructions</option>
+                          <option value="2">Developments</option>
                         </select>
                       </div>
                       {/* Is Active */}
                       <div className="mt-5 mb-4.5 flex items-center flex-col gap-6 xl:flex-row">
-                        <label
-                          htmlFor="isActive"
-                          className="flex cursor-pointer"
-                        >
+                        <label className="flex cursor-pointer">
                           <div className="relative pt-0.5">
                             <input
                               type="checkbox"
@@ -305,10 +405,14 @@ const AddProject: React.FC = () => {
                               onChange={(e) => {
                                 handleChange(e);
 
-                                handleChangeValues(e.target.value, 'mainPage');
+                                // Use `e.target.checked` for the checkbox value
+                                handleChangeValues(
+                                  e.target.checked,
+                                  'mainPage',
+                                );
                               }}
                               onBlur={handleBlur}
-                              value={values.mainPage}
+                              checked={values.mainPage}
                             />
                             <div className="box mr-3 flex h-5 w-5 items-center justify-center rounded border border-stroke dark:border-strokedark">
                               <span className="text-white opacity-0">
@@ -335,29 +439,6 @@ const AddProject: React.FC = () => {
                       </div>
 
                       <div className="divider"></div>
-
-                      <div className="mb-4.5 flex items-center flex-col gap-6 xl:flex-row">
-                        <label className="mb-2.5 block text-black dark:text-white">
-                          Main Image Title
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Enter main image title here"
-                          className="w-3/4 rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                          name="mainImageTitle"
-                          id="mainImageTitle"
-                          onChange={(e) => {
-                            handleChange(e);
-
-                            handleChangeValues(
-                              e.target.value,
-                              'mainImageTitle',
-                            );
-                          }}
-                          onBlur={handleBlur}
-                          value={values.mainImageTitle}
-                        />
-                      </div>
 
                       <div className="mb-4 flex items-center gap-3">
                         <div className="h-14 w-14 rounded-full">

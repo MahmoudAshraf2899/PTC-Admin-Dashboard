@@ -23,6 +23,7 @@ import GuaranteeSection from './pages/GuaranteeSection/GuaranteeSection';
 import AdSection from './pages/AdSection/AdSection';
 import Projects from './pages/projects/Projects';
 import AddProject from './pages/projects/AddProject';
+import { EditProject } from './pages/projects/EditProject';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -104,6 +105,15 @@ function App() {
               <>
                 <PageTitle title="Add Project | PTC - Admin Dashboard" />
                 <AddProject />
+              </>
+            }
+          />
+          <Route
+            path="/EditProject/:id"
+            element={
+              <>
+                <PageTitle title="Edit Project | PTC - Admin Dashboard" />
+                <EditProject />
               </>
             }
           />

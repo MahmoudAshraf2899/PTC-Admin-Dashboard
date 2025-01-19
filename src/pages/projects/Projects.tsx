@@ -7,6 +7,7 @@ import Loader from '../../common/Loader';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb.js';
 import Pagination from '../../common/paginator/Pagination.js';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 interface ApiResponse {
   id: Number;
@@ -134,6 +135,11 @@ const Projects: React.FC = () => {
       {
         Header: 'Updated By',
         accessor: 'updatedBy',
+        Cell: (props: any) => (
+          <div className="text-sm font-medium text-black dark:text-white">
+            {props.value}
+          </div>
+        ),
       },
     ],
     [],
@@ -149,6 +155,27 @@ const Projects: React.FC = () => {
 
   const handlePageChange = (pageNumber: number) => {
     setPage(pageNumber);
+  };
+
+  const handleDeleteProject = (id: number) => {
+    setIsLoading(true);
+    API.delete(`${END_POINTS.DELETE_PROJECT}/${id}`)
+      .then((res) => {
+        if (res && res.data) {
+          toast.success('Operation completed successfully');
+
+          setTimeout(() => {
+            retrieveProjects();
+          }, 5000);
+        }
+      })
+      .catch((error) => {
+        console.error('Error deleting project:', error);
+        toast.error(error.message);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   return (
@@ -234,7 +261,10 @@ const Projects: React.FC = () => {
                           />
                         </svg>
                       </button>
-                      <button className="hover:text-red-500">
+                      <button
+                        className="hover:text-red-500"
+                        onClick={() => handleDeleteProject(row.original.id)}
+                      >
                         <svg
                           className="fill-current"
                           width="18"

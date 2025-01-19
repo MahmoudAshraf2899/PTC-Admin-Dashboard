@@ -7,4 +7,5 @@ export const END_POINTS = {
   ADD_MEDIA: 'api/admin/Media',
   GET_PROJECT: 'api/admin/Project/',
   UPDATE_PROJECT: 'api/admin/Project',
+  DELETE_PROJECT: 'api/admin/Project',
 };

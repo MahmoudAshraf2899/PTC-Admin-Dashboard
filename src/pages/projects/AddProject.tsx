@@ -17,9 +17,9 @@ interface FilePreview {
   preview: string;
 }
 const validationSchema = Yup.object().shape({
-  farmArea: Yup.string()
-    .matches(/^(?![1-9]$)\d+$/, 'من فضلك قم بإدخال رقم اكبر من 9')
-    .required('من فضلك قم بإدخال مساحة العنبر'),
+  projectTypeId: Yup.string().required('Please Select Project Type'),
+  description: Yup.string().required('Description is required'),
+  title: Yup.string().required('Project name is required'),
 });
 
 const AddProject: React.FC = () => {
@@ -125,97 +125,7 @@ const AddProject: React.FC = () => {
       [fieldName]: value,
     }));
   };
-  // const handleAddProject = async (values: any) => {
-  //   setIsLoading(true);
-  //   // First Call Add Media End Point
-  //   for (let i = 0; i < files.length; i++) {
-  //     const formData = new FormData();
-  //     formData.append('file', files[i].file);
-  //     const data = {
-  //       File: files[i].file,
-  //       MediaType: files[i].file.type == 'image/png' ? 1 : 2,
-  //       Directory: 8,
-  //     };
-  //     axios
-  //       .post(`${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`, data, {
-  //         headers: {
-  //           Authorization: `Bearer ${localStorage.getItem('token')}`,
-  //           'Content-Type': 'multipart/form-data',
-  //         },
-  //       })
-  //       .then((res) => {
-  //         if (res.status === 200) {
-  //           setMediaUID((prevArray) => [...prevArray, res.data.id]);
-  //         }
-  //       })
-  //       .catch((error) => {});
-  //   }
-  //   //Add Main Image End Point
-  //   const data = {
-  //     File: mainFile,
-  //     MediaType: 1,
-  //     Directory: 8,
-  //   };
-  //   axios
-  //     .post(`${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`, data, {
-  //       headers: {
-  //         Authorization: `Bearer ${localStorage.getItem('token')}`,
-  //         'Content-Type': 'multipart/form-data',
-  //       },
-  //     })
-  //     .then((res) => {
-  //       if (res.status === 200) {
-  //         setMainImageUID(res.data.id);
-  //       }
-  //     })
-  //     .catch((error) => {});
-  //   //Second Call Add Project End Point
-  //   let requestObject: {
-  //     title: string;
-  //     description: string;
-  //     projectTypeId: string;
-  //     mainImage: string;
-  //     mainImageTitle: string;
-  //     mainPage: string;
-  //     media: { uid: string }[];
-  //   } = {
-  //     title: values.title,
-  //     description: values.description,
-  //     projectTypeId: projectTypeId,
-  //     mainImage: mainImageUID,
-  //     mainImageTitle: values.mainImageTitle,
-  //     mainPage: values.mainPage,
-  //     media: mediaUID.map((uid) => ({ uid })),
-  //   };
-  //   let response2: any;
-  //   response2 = axios.post(
-  //     `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_PROJECT}`,
-  //     requestObject,
-  //     {
-  //       headers: {
-  //         Authorization: `Bearer ${localStorage.getItem('token')}`,
-  //         'Content-Type': 'application/json',
-  //       },
-  //     },
-  //   );
 
-  //   // API.post(`api/admin/Visit`, requestObject)
-  //   //   .then((res: any) => {
-  //   //     if (res.status === 200) {
-  //   //       toast.success('Operation completed successfully');
-  //   //       navigate(-1);
-  //   //       setIsLoading(false);
-  //   //     } else {
-  //   //       toast.error('Something went wrong ..!');
-  //   //       setIsLoading(false);
-  //   //     }
-  //   //   })
-  //   //   .catch((error) => {
-  //   //     toast.error('Something went wrong ..!');
-  //   //     console.log(error);
-  //   //     setIsLoading(false);
-  //   //   });
-  // };
   const handleAddProject = async (values: any) => {
     setIsLoading(true);
 
@@ -319,7 +229,7 @@ const AddProject: React.FC = () => {
               onSubmit={(values) => handleAddProject(values)}
               enableReinitialize
               initialValues={addObject}
-              // validationSchema={validationSchema}
+              validationSchema={validationSchema}
               //   validationSchema={validationSchema}
               key={`AddProject`}
             >
@@ -355,6 +265,11 @@ const AddProject: React.FC = () => {
                           onBlur={handleBlur}
                           value={values.title}
                         />
+                        {touched.title && errors.title && (
+                          <div className="text-red-500 text-sm mt-1">
+                            {errors.title}
+                          </div>
+                        )}
                       </div>
 
                       {/* description */}
@@ -376,6 +291,11 @@ const AddProject: React.FC = () => {
                           onBlur={handleBlur}
                           value={values.description}
                         />
+                        {touched.description && errors.description && (
+                          <div className="text-red-500 text-sm mt-1">
+                            {errors.description}
+                          </div>
+                        )}
                       </div>
 
                       {/* Project Type */}
@@ -387,13 +307,29 @@ const AddProject: React.FC = () => {
 
                         <select
                           className="select max-w-47.5 sm:max-w-full text-slate-500  border-none bg-slate-200"
-                          onChange={(e) => setProjectTypeId(e.target.value)}
+                          onChange={(e) => {
+                            handleChange(e);
+                            setFieldValue('projectTypeId', e.target.value);
+                          }}
+                          value={values.projectTypeId}
                         >
+                          <option
+                            value=""
+                            disabled
+                            className="text-body dark:text-bodydark"
+                          >
+                            Select your project type
+                          </option>
                           <option value="1">Constructions</option>
                           <option value="2">Developments</option>
                         </select>
+                        {touched.projectTypeId && errors.projectTypeId && (
+                          <div className="text-red-500 text-sm mt-1">
+                            {errors.projectTypeId}
+                          </div>
+                        )}
                       </div>
-                      {/* Is Active */}
+                      {/* Main Page */}
                       <div className="mt-5 mb-4.5 flex items-center flex-col gap-6 xl:flex-row">
                         <label className="flex cursor-pointer">
                           <div className="relative pt-0.5">

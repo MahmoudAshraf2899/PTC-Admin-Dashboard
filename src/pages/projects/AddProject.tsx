@@ -386,7 +386,7 @@ const AddProject: React.FC = () => {
                         </label>
 
                         <select
-                          className="select select-block text-slate-500  border-none bg-slate-200"
+                          className="select max-w-47.5 sm:max-w-full text-slate-500  border-none bg-slate-200"
                           onChange={(e) => setProjectTypeId(e.target.value)}
                         >
                           <option value="1">Constructions</option>

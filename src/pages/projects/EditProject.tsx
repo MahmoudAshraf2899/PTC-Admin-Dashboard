@@ -389,7 +389,7 @@ export const EditProject = () => {
                         </label>
 
                         <select
-                          className="select select-block text-slate-500  border-none bg-slate-200"
+                          className="select max-w-47.5 sm:max-w-full text-slate-500  border-none bg-slate-200"
                           value={projectTypeId}
                           onChange={(e) => setProjectTypeId(e.target.value)}
                         >

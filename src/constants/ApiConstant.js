@@ -8,4 +8,9 @@ export const END_POINTS = {
   GET_PROJECT: 'api/admin/Project/',
   UPDATE_PROJECT: 'api/admin/Project',
   DELETE_PROJECT: 'api/admin/Project',
+  GET_ABOUT_US: 'api/admin/AboutUs',
+  GET_PRIVACY_POLICY: 'api/admin/PrivacyPolicy',
+  GET_CONSTRUCTIONS: 'api/admin/Constructions',
+  GET_DEVELOPMENT: 'api/admin/Developments',
+  GET_AD_SECTION: 'api/admin/AdSection',
 };

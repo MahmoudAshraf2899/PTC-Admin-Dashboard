@@ -20,10 +20,14 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { HeroSection } from './pages/HeroSection/HeroSection';
 import GuaranteeSection from './pages/GuaranteeSection/GuaranteeSection';
-import AdSection from './pages/AdSection/AdSection';
+import { AdSection } from './pages/AdSection/AdSection';
 import Projects from './pages/projects/Projects';
 import AddProject from './pages/projects/AddProject';
 import { EditProject } from './pages/projects/EditProject';
+import { AboutUs } from './pages/AboutUs/AboutUs';
+import { PrivacyPolicy } from './pages/PrivacyPolicy/PrivacyPolicy';
+import { Constructions } from './pages/Constructions/Constructions';
+import { Developments } from './pages/Developments/Developments';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -114,6 +118,42 @@ function App() {
               <>
                 <PageTitle title="Edit Project | PTC - Admin Dashboard" />
                 <EditProject />
+              </>
+            }
+          />
+          <Route
+            path="/About-Us"
+            element={
+              <>
+                <PageTitle title="About Us | PTC - Admin Dashboard" />
+                <AboutUs />
+              </>
+            }
+          />
+          <Route
+            path="/Privacy-Policy"
+            element={
+              <>
+                <PageTitle title="Privacy Policy  | PTC - Admin Dashboard" />
+                <PrivacyPolicy />
+              </>
+            }
+          />
+          <Route
+            path="/constructions"
+            element={
+              <>
+                <PageTitle title="Constructions Page  | PTC - Admin Dashboard" />
+                <Constructions />
+              </>
+            }
+          />
+          <Route
+            path="/development"
+            element={
+              <>
+                <PageTitle title="Developments Page  | PTC - Admin Dashboard" />
+                <Developments />
               </>
             }
           />

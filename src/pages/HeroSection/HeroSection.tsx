@@ -25,11 +25,14 @@ interface ApiResponse {
 }
 
 const validationSchema = Yup.object().shape({
-  farmArea: Yup.string()
-    .matches(/^(?![1-9]$)\d+$/, 'من فضلك قم بإدخال رقم اكبر من 9')
-    .required('من فضلك قم بإدخال مساحة العنبر'),
+  mainTitle: Yup.string().required('Main Title is required'),
+  subTitle: Yup.string().required('Sub Title is required'),
+  subTitleDescription: Yup.string().required(
+    'Sub Title Description is required',
+  ),
+  mainImage: Yup.mixed().required('Main Image is required'),
+  subImage: Yup.mixed().required('Sub Image is required'),
 });
-
 export const HeroSection = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [apiResponse, setApiResponse] = useState<ApiResponse | null>(null);
@@ -56,8 +59,44 @@ export const HeroSection = () => {
     });
   }, []);
 
-  const confirmAddBreeder = (values: any) => {
+  const confirmUpdateHero = (values: any) => {
     setIsLoading(true);
+
+    const formData = new FormData();
+
+    // Append form fields to FormData
+    formData.append('Id', values.id || ''); // Assuming you want to send the 'id' field too
+    formData.append('MainImage', file ? file : values.mainImage); // Attach file if exists, otherwise use current image
+    formData.append('MainTitle', values.mainTitle);
+    formData.append('SubTitle', values.subTitle);
+    formData.append('SubTitleDescription', values.subTitleDescription);
+    formData.append('SubImage', subFile ? subFile : values.subImage); // Attach sub image file if exists, otherwise use current image
+    formData.append('IsActive', values.isActive ? 'true' : 'false');
+
+    // Send the PUT request
+    fetch(`${BaseURL.SmarterAspNetBase}${END_POINTS.UPDATE_HERO_SECTION}`, {
+      method: 'PUT',
+      headers: {
+        accept: '*/*',
+        authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: formData, // Attach the FormData object as the request body
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setIsLoading(false);
+        if (data.success) {
+          // Handle success, e.g., show a success message or redirect
+          console.log('Hero section updated successfully');
+        } else {
+          // Handle error
+          console.error('Failed to update hero section', data.message);
+        }
+      })
+      .catch((error) => {
+        setIsLoading(false);
+        console.error('Error during API call:', error);
+      });
   };
 
   const handleChangeHeroSection = (
@@ -92,7 +131,7 @@ export const HeroSection = () => {
     setFileUploadContentVisible(false);
     setShowOldMainImage(false); // Hide the old main image
   };
-  const readURL = (input: any) => {
+  const readURL = (input: any, value, setFieldValue) => {
     if (input.files && input.files[0]) {
       const reader = new FileReader();
 
@@ -100,15 +139,15 @@ export const HeroSection = () => {
         setImageUploadWrapClass('image-upload-wrap image-dropping');
         setFileUploadContentVisible(true);
         setFile(input.files[0]);
+        setFieldValue('mainImage', input.files[0]);
       };
 
       reader.readAsDataURL(input.files[0]);
     } else {
-      removeUpload();
     }
   };
 
-  const readSubImageURL = (input: any) => {
+  const readSubImageURL = (input: any, values, setFieldValue) => {
     if (input.files && input.files[0]) {
       const reader = new FileReader();
 
@@ -116,11 +155,11 @@ export const HeroSection = () => {
         setImageUploadWrapClass('image-upload-wrap image-dropping');
         setSubFileUploadContentVisible(true);
         setSubFile(input.files[0]);
+        setFieldValue('subImage', input.files[0]);
       };
 
       reader.readAsDataURL(input.files[0]);
     } else {
-      removeUpload();
     }
   };
 
@@ -132,6 +171,20 @@ export const HeroSection = () => {
     setImageUploadWrapClass('image-upload-wrap');
   };
 
+  const handleDeleteMainImage = (values, setFieldValue) => {
+    // Set the mainImage value to an empty string
+    setFieldValue('mainImage', '');
+    // Hide the old main image
+    setShowOldMainImage(false);
+  };
+
+  const handleDeleteSubImage = (values, setFieldValue) => {
+    // Set the subImage value to an empty string
+    setFieldValue('subImage', '');
+    // Hide the old sub image
+    setShowOldSubImage(false);
+  };
+
   return (
     <>
       <Breadcrumb pageName="Hero Section" />
@@ -141,7 +194,7 @@ export const HeroSection = () => {
           {/* <!-- Contact Form --> */}
           <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
             <Formik
-              onSubmit={(values) => confirmAddBreeder(values)}
+              onSubmit={(values) => confirmUpdateHero(values)}
               enableReinitialize
               initialValues={{
                 isActive: apiResponse?.isActive,
@@ -151,7 +204,6 @@ export const HeroSection = () => {
                 subTitle: apiResponse?.subTitle,
                 subTitleDescription: apiResponse?.subTitleDescription,
               }}
-              // validationSchema={validationSchema}
               key={`HeroSection`}
               validationSchema={validationSchema}
             >
@@ -191,6 +243,11 @@ export const HeroSection = () => {
                           onBlur={handleBlur}
                           value={values.mainTitle}
                         />
+                        {touched.mainTitle && errors.mainTitle && (
+                          <div className="text-red-500 text-sm mt-1">
+                            {errors.mainTitle}
+                          </div>
+                        )}
                       </div>
 
                       {/* Subtitle */}
@@ -216,6 +273,11 @@ export const HeroSection = () => {
                           onBlur={handleBlur}
                           value={values.subTitle}
                         />
+                        {touched.subTitle && errors.subTitle && (
+                          <div className="text-red-500 text-sm mt-1">
+                            {errors.subTitle}
+                          </div>
+                        )}
                       </div>
 
                       {/* Subtitle Description */}
@@ -243,6 +305,12 @@ export const HeroSection = () => {
                           onBlur={handleBlur}
                           value={values.subTitleDescription}
                         />
+                        {touched.subTitleDescription &&
+                          errors.subTitleDescription && (
+                            <div className="text-red-500 text-sm mt-1">
+                              {errors.subTitleDescription}
+                            </div>
+                          )}
                       </div>
                       {/* Is Active */}
                       <div className="mt-5 mb-4.5 flex items-center flex-col gap-6 xl:flex-row">
@@ -346,7 +414,9 @@ export const HeroSection = () => {
                             {showOldMainImage && (
                               <button
                                 className="text-sm hover:text-primary"
-                                onClick={() => setShowOldMainImage(false)}
+                                onClick={() =>
+                                  handleDeleteMainImage(values, setFieldValue)
+                                }
                               >
                                 Delete
                               </button>
@@ -354,7 +424,11 @@ export const HeroSection = () => {
                           </span>
                         </div>
                       </div>
-
+                      {touched.mainImage && errors.mainImage && (
+                        <div className="text-red-500 text-sm mt-1">
+                          {errors.mainImage}
+                        </div>
+                      )}
                       {showOldMainImage && (
                         <>
                           <div className="w-f mb-5.5 block">
@@ -383,7 +457,9 @@ export const HeroSection = () => {
                               onDragLeave={() => handleDragLeave()}
                               className="absolute inset-0 z-50 m-0 h-full w-full cursor-pointer p-0 opacity-0 outline-none"
                               type="file"
-                              onChange={(e) => readURL(e.target)}
+                              onChange={(e) =>
+                                readURL(e.target, values, setFieldValue)
+                              }
                               accept="image/*"
                             />
                             <div className="flex flex-col items-center justify-center space-y-3">
@@ -496,7 +572,9 @@ export const HeroSection = () => {
                             {showOldSubImage && (
                               <button
                                 className="text-sm hover:text-primary"
-                                onClick={() => setShowOldSubImage(false)}
+                                onClick={() =>
+                                  handleDeleteSubImage(values, setFieldValue)
+                                }
                               >
                                 Delete
                               </button>
@@ -504,6 +582,11 @@ export const HeroSection = () => {
                           </span>
                         </div>
                       </div>
+                      {touched.subImage && errors.subImage && (
+                        <div className="text-red-500 text-sm mt-1">
+                          {errors.subImage}
+                        </div>
+                      )}
 
                       {showOldSubImage && (
                         <>
@@ -533,7 +616,9 @@ export const HeroSection = () => {
                               onDragLeave={() => handleDragLeave()}
                               className="absolute inset-0 z-50 m-0 h-full w-full cursor-pointer p-0 opacity-0 outline-none"
                               type="file"
-                              onChange={(e) => readSubImageURL(e.target)}
+                              onChange={(e) =>
+                                readSubImageURL(e.target, values, setFieldValue)
+                              }
                               accept="image/*"
                             />
                             <div className="flex flex-col items-center justify-center space-y-3">

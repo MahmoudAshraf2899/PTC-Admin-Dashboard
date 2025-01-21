@@ -13,4 +13,5 @@ export const END_POINTS = {
   GET_CONSTRUCTIONS: 'api/admin/Constructions',
   GET_DEVELOPMENT: 'api/admin/Developments',
   GET_AD_SECTION: 'api/admin/AdSection',
+  GET_GUARANTEE_SECTION: 'api/admin/GuaranteeSection',
 };

@@ -495,12 +495,6 @@ const AddProject: React.FC = () => {
                       <div
                         className="relative mb-5.5 block w-full cursor-pointer appearance-none rounded border border-dashed border-primary bg-gray py-4 px-4 dark:bg-meta-4 sm:py-7.5"
                         {...getRootProps()}
-                        // style={{
-                        //   border: '2px dashed #ccc',
-                        //   padding: '20px',
-                        //   textAlign: 'center',
-                        //   cursor: 'pointer',
-                        // }}
                       >
                         <input
                           {...getInputProps()}

@@ -186,8 +186,8 @@ const Projects: React.FC = () => {
         <div className="search-bar flex items-center gap-4">
           <input
             type="text"
-            className="w-full sm:w-1/4 rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-            placeholder="Search by title"
+            className="w-full sm:w-1/4 rounded border-[1.5px] border-stroke bg-transparent py-3 px-1 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+            placeholder="search by name"
             value={searchTitle}
             onChange={(e) => setSearchTitle(e.target.value)}
           />

@@ -45,6 +45,8 @@ export const HeroSection = () => {
   const [showOldSubImage, setShowOldSubImage] = useState<boolean>(true);
 
   useEffect(() => {
+    setIsLoading(true);
+
     API.get(`${END_POINTS.GET_HERO_SECTION}/1`).then((res) => {
       if (res.status == 200) {
         setApiResponse(res.data.data);

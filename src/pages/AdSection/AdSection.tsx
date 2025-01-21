@@ -23,9 +23,10 @@ interface ApiResponse {
 }
 
 const validationSchema = Yup.object().shape({
-  farmArea: Yup.string()
-    .matches(/^(?![1-9]$)\d+$/, 'من فضلك قم بإدخال رقم اكبر من 9')
-    .required('من فضلك قم بإدخال مساحة العنبر'),
+  title: Yup.string().required('please add title'), // Required validation for title
+  description: Yup.string().required('Please add description'), // Required validation for description
+
+  mainImage: Yup.mixed().required('Main Image is required'),
 });
 
 export const AdSection = () => {
@@ -90,7 +91,7 @@ export const AdSection = () => {
     setFileUploadContentVisible(false);
     setShowOldMainImage(false); // Hide the old main image
   };
-  const readURL = (input: any) => {
+  const readURL = (input: any, value, setFieldValue) => {
     if (input.files && input.files[0]) {
       const reader = new FileReader();
 
@@ -98,27 +99,10 @@ export const AdSection = () => {
         setImageUploadWrapClass('image-upload-wrap image-dropping');
         setFileUploadContentVisible(true);
         setFile(input.files[0]);
+        setFieldValue('mainImage', input.files[0]);
       };
 
       reader.readAsDataURL(input.files[0]);
-    } else {
-      removeUpload();
-    }
-  };
-
-  const readSubImageURL = (input: any) => {
-    if (input.files && input.files[0]) {
-      const reader = new FileReader();
-
-      reader.onload = (e) => {
-        setImageUploadWrapClass('image-upload-wrap image-dropping');
-        setSubFileUploadContentVisible(true);
-        setSubFile(input.files[0]);
-      };
-
-      reader.readAsDataURL(input.files[0]);
-    } else {
-      removeUpload();
     }
   };
 
@@ -128,6 +112,13 @@ export const AdSection = () => {
 
   const handleDragLeave = () => {
     setImageUploadWrapClass('image-upload-wrap');
+  };
+
+  const handleDeleteMainImage = (values, setFieldValue) => {
+    // Set the mainImage value to an empty string
+    setFieldValue('mainImage', '');
+    // Hide the old main image
+    setShowOldMainImage(false);
   };
 
   return (
@@ -187,6 +178,11 @@ export const AdSection = () => {
                           onBlur={handleBlur}
                           value={values.title}
                         />
+                        {touched.title && errors.title && (
+                          <div className="text-red-500 text-sm mt-1">
+                            {errors.title}
+                          </div>
+                        )}
                       </div>
 
                       {/* Description */}
@@ -212,6 +208,11 @@ export const AdSection = () => {
                           onBlur={handleBlur}
                           value={values.description}
                         />
+                        {touched.description && errors.description && (
+                          <div className="text-red-500 text-sm mt-1">
+                            {errors.description}
+                          </div>
+                        )}
                       </div>
 
                       {/* Is Active */}
@@ -313,7 +314,9 @@ export const AdSection = () => {
                             {showOldMainImage && (
                               <button
                                 className="text-sm hover:text-primary"
-                                onClick={() => setShowOldMainImage(false)}
+                                onClick={() =>
+                                  handleDeleteMainImage(values, setFieldValue)
+                                }
                               >
                                 Delete
                               </button>
@@ -350,7 +353,9 @@ export const AdSection = () => {
                               onDragLeave={() => handleDragLeave()}
                               className="absolute inset-0 z-50 m-0 h-full w-full cursor-pointer p-0 opacity-0 outline-none"
                               type="file"
-                              onChange={(e) => readURL(e.target)}
+                              onChange={(e) =>
+                                readURL(e.target, values, setFieldValue)
+                              }
                               accept="image/*"
                             />
                             <div className="flex flex-col items-center justify-center space-y-3">
@@ -408,7 +413,11 @@ export const AdSection = () => {
                           </div>
                         </>
                       )}
-
+                      {touched.mainImage && errors.mainImage && (
+                        <div className="text-red-500 text-sm mt-1">
+                          {errors.mainImage}
+                        </div>
+                      )}
                       <button className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90">
                         Save
                       </button>

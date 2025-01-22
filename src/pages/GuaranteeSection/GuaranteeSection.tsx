@@ -6,18 +6,13 @@ import { END_POINTS } from '../../constants/ApiConstant';
 import Loader from '../../common/Loader';
 import { BaseURL } from '../../constants/Bases.js';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
-interface ApiResponse {
-  id: string;
-  title: string;
-  icon: string;
-  updatedAt: string;
-  updatedBy: string;
-}
 interface FilePreview {
   file: File;
-  preview: string;
-  UID: string;
+  index: number; // Add index to track file's corresponding child
 }
 const GuaranteeSection = () => {
   const [initialValues, setInitialValues] = useState({
@@ -26,19 +21,10 @@ const GuaranteeSection = () => {
     children: [{ title: '', icon: '' }], // Ensure at least one child by default
   });
   const [isLoading, setIsLoading] = useState(true);
-  const [imageUploadWrapClass, setImageUploadWrapClass] =
-    useState('image-upload-wrap');
-  const [
-    mainImageFileUploadContentVisible,
-    setMainImageFileUploadContentVisible,
-  ] = useState(false);
-  const [mainFile, setMainFile] = useState<File | null>(null);
-
-  const [fileUploadContentVisible, setFileUploadContentVisible] =
-    useState(false);
-  const [showOldMainImage, setShowOldMainImage] = useState<boolean>(true);
+  const [uploadResponses, setUploadResponses] = useState([{}]);
   const [files, setFiles] = useState<FilePreview[]>([]);
-  const [file, setFile] = useState<File | null>(null);
+  const navigate = useNavigate();
+
   const validationSchema = Yup.object({
     title: Yup.string().required('Title is required'),
 
@@ -94,67 +80,100 @@ const GuaranteeSection = () => {
     setFieldValue('children', updatedChildren);
   };
 
-  const handleSubmit = (values) => {
-    console.log('Form submitted with values:', values);
-    alert('Form submitted successfully!');
+  const uploadIcon = async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const response = await API.post(END_POINTS.ADD_MEDIA, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      throw error;
+    }
   };
 
-  const removeFile = (fileName: string) => {
-    setFiles((prevFiles) =>
-      prevFiles.filter((filePreview) => filePreview.file.name !== fileName),
-    );
-  };
-
-  const removeUpload = () => {
-    setMainFile(null);
-    setImageUploadWrapClass('image-upload-wrap');
-    setFileUploadContentVisible(false);
-  };
-  const readURL = (input: any, index: number, values, setFieldValue) => {
+  const readURL = async (
+    input: any,
+    index: number,
+    values: any,
+    setFieldValue: (field: string, value: any) => void,
+  ) => {
     if (input.files && input.files[0]) {
+      const file = input.files[0];
       const reader = new FileReader();
 
       reader.onload = (e) => {
-        // Update the specific child by index
         const updatedChildren = [...values.children];
-        updatedChildren[index].icon = e.target?.result; // Update icon with file preview URL
-
-        // Update the Formik field value
+        updatedChildren[index].icon = e.target?.result; // Update preview
         setFieldValue('children', updatedChildren);
+
+        // Add the file and index to the state
+        setFiles((prevFiles) => [...prevFiles, { file, index }]);
       };
 
-      reader.readAsDataURL(input.files[0]); // Generate preview URL
+      reader.readAsDataURL(file);
     }
   };
-
-  const readMainImageURL = (input: any) => {
-    if (input.files && input.files[0]) {
-      const reader = new FileReader();
-
-      reader.onload = (e) => {
-        setImageUploadWrapClass('image-upload-wrap image-dropping');
-        setMainImageFileUploadContentVisible(true);
-        setMainFile(input.files[0]);
-      };
-
-      reader.readAsDataURL(input.files[0]);
-    } else {
-      removeUpload();
-    }
-  };
-
-  const handleDragOver = () => {
-    setImageUploadWrapClass('image-upload-wrap image-dropping');
-  };
-
-  const handleDragLeave = () => {
-    setImageUploadWrapClass('image-upload-wrap');
-  };
-
   const handleDeleteIcon = (index, values, setFieldValue) => {
     const updatedChildren = [...values.children];
     updatedChildren[index].icon = ''; // Reset the icon field
     setFieldValue('children', updatedChildren);
+  };
+
+  const handleSubmit = async (values: any) => {
+    try {
+      setIsLoading(true);
+      const updatedChildren = [...values.children];
+
+      for (const { file, index } of files) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('MediaType', '1');
+        formData.append('Directory', '5');
+
+        const mediaResponse = await axios.post(
+          `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              'Content-Type': 'multipart/form-data',
+            },
+          },
+        );
+
+        if (mediaResponse.status === 200) {
+          if (updatedChildren.length == 1) {
+            updatedChildren[0].icon = mediaResponse.data.path;
+          } else {
+            updatedChildren[index].icon = mediaResponse.data.path; // Update icon with uploaded path
+          }
+        }
+      }
+      values.id = 1;
+      // Use updated children with uploaded paths
+      let payload = {
+        ...values,
+        nodes: updatedChildren,
+      };
+      API.put(
+        `${BaseURL.SmarterAspNetBase}${END_POINTS.UPDATE_GUARANTEE_SECTION}`,
+        payload,
+      ).then((res) => {
+        if (res.status == 200) {
+          toast.success('Operation completed successfully');
+          setIsLoading(false);
+          navigate('/');
+        }
+      });
+    } catch (error) {
+      console.error('Error during form submission:', error);
+    }
   };
 
   if (isLoading) {
@@ -269,7 +288,8 @@ const GuaranteeSection = () => {
                       <div className="flex items-center gap-4">
                         <img
                           src={
-                            child.icon.startsWith('\\') // Check if it's a relative URL (from your server)
+                            child.icon.startsWith('\\') ||
+                            child.icon.startsWith('//') // Check if it's a relative URL (from your server)
                               ? BaseURL.SmarterAspNetBase + child.icon // Prepend base URL for server icons
                               : child.icon // If it's a local file URL, use the direct URL
                           }

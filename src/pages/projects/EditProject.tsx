@@ -85,6 +85,7 @@ export const EditProject = () => {
             : media.mediaUrl; // Normalize the URL if necessary
           preview = BaseURL.SmarterAspNetBase + preview;
           let UID = media.mediaUID;
+
           return {
             file,
             preview, // Include the preview property

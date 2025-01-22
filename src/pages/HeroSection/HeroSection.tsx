@@ -34,10 +34,14 @@ const validationSchema = Yup.object().shape({
   subImage: Yup.mixed().required('Sub Image is required'),
 });
 export const HeroSection = () => {
+  const navigate = useNavigate();
+
   const [isLoading, setIsLoading] = useState(false);
   const [apiResponse, setApiResponse] = useState<ApiResponse | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [subFile, setSubFile] = useState<File | null>(null);
+  const [subFileMediaPath, setSubFileMediaPath] = useState('');
+  const [mainFileMediaPath, setMainFileMediaPath] = useState('');
   const [imageUploadWrapClass, setImageUploadWrapClass] =
     useState('image-upload-wrap');
   const [fileUploadContentVisible, setFileUploadContentVisible] =
@@ -59,44 +63,104 @@ export const HeroSection = () => {
     });
   }, []);
 
-  const confirmUpdateHero = (values: any) => {
+  const confirmUpdateHero = async (values: any) => {
     setIsLoading(true);
+    let subFilePath = '';
+    let mainFilePath = '';
 
-    const formData = new FormData();
+    try {
+      if (subFile != null) {
+        const formData = new FormData();
 
-    // Append form fields to FormData
-    formData.append('Id', values.id || ''); // Assuming you want to send the 'id' field too
-    formData.append('MainImage', file ? file : values.mainImage); // Attach file if exists, otherwise use current image
-    formData.append('MainTitle', values.mainTitle);
-    formData.append('SubTitle', values.subTitle);
-    formData.append('SubTitleDescription', values.subTitleDescription);
-    formData.append('SubImage', subFile ? subFile : values.subImage); // Attach sub image file if exists, otherwise use current image
-    formData.append('IsActive', values.isActive ? 'true' : 'false');
+        formData.append('file', subFile);
+        const data = {
+          File: subFile,
+          MediaType: 1,
+          Directory: 1,
+        };
+        const mediaResponse = await axios.post(
+          `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`,
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              'Content-Type': 'multipart/form-data',
+            },
+          },
+        );
 
-    // Send the PUT request
-    fetch(`${BaseURL.SmarterAspNetBase}${END_POINTS.UPDATE_HERO_SECTION}`, {
-      method: 'PUT',
-      headers: {
-        accept: '*/*',
-        authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-      body: formData, // Attach the FormData object as the request body
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setIsLoading(false);
-        if (data.success) {
-          // Handle success, e.g., show a success message or redirect
-          console.log('Hero section updated successfully');
-        } else {
-          // Handle error
-          console.error('Failed to update hero section', data.message);
+        if (mediaResponse.status === 200) {
+          setSubFileMediaPath(mediaResponse.data.path);
+          subFilePath = mediaResponse.data.path;
         }
-      })
-      .catch((error) => {
-        setIsLoading(false);
-        console.error('Error during API call:', error);
-      });
+      }
+      if (file != null) {
+        const formData = new FormData();
+
+        formData.append('file', file);
+        const data = {
+          File: file,
+          MediaType: 1,
+          Directory: 1,
+        };
+        const mediaResponse = await axios.post(
+          `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`,
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              'Content-Type': 'multipart/form-data',
+            },
+          },
+        );
+
+        if (mediaResponse.status === 200) {
+          setMainFileMediaPath(mediaResponse.data.path);
+          mainFilePath = mediaResponse.data.path;
+        }
+      }
+      const formData = new FormData();
+
+      // Append form fields to FormData
+      formData.append('Id', '1'); // Assuming you want to send the 'id' field too
+      formData.append(
+        'MainImage',
+        mainFilePath.length != 0 ? mainFilePath : values.mainImage,
+      ); // Attach file if exists, otherwise use current image
+      formData.append('MainTitle', values.mainTitle);
+      formData.append('SubTitle', values.subTitle);
+      formData.append('SubTitleDescription', values.subTitleDescription);
+      formData.append(
+        'SubImage',
+        subFilePath.length != 0 ? subFilePath : values.subImage,
+      ); // Attach sub image file if exists, otherwise use current image
+      formData.append('IsActive', values.isActive ? 'true' : 'false');
+
+      // Send the PUT request
+      const updateResponse = await fetch(
+        `${BaseURL.SmarterAspNetBase}${END_POINTS.UPDATE_HERO_SECTION}`,
+        {
+          method: 'PUT',
+          headers: {
+            accept: '*/*',
+            authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+          body: formData, // Attach the FormData object as the request body
+        },
+      );
+      if (updateResponse.status === 200) {
+        toast.success('Operation completed successfully');
+
+        navigate('/');
+      } else {
+        toast.error('Something went wrong ..!');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('An error occurred while processing your request.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleChangeHeroSection = (
@@ -287,8 +351,7 @@ export const HeroSection = () => {
                           <br />
                           Description
                         </label>
-                        <input
-                          type="text"
+                        <textarea
                           placeholder="Enter your sub title description here"
                           className="w-3/4 rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                           name="subTitleDescription"

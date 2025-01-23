@@ -22,12 +22,14 @@ interface ApiResponse {
 }
 
 const validationSchema = Yup.object().shape({
-  farmArea: Yup.string()
-    .matches(/^(?![1-9]$)\d+$/, 'من فضلك قم بإدخال رقم اكبر من 9')
-    .required('من فضلك قم بإدخال مساحة العنبر'),
+  title: Yup.string().required('title is required'),
+  description: Yup.string().required('title is required'),
+  mainImage: Yup.mixed().required('Image is required'),
 });
 
 export const PrivacyPolicy = () => {
+  const navigate = useNavigate();
+
   const [isLoading, setIsLoading] = useState(false);
   const [apiResponse, setApiResponse] = useState<ApiResponse | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -39,7 +41,7 @@ export const PrivacyPolicy = () => {
   const [subFileUploadContentVisible, setSubFileUploadContentVisible] =
     useState(false);
   const [showOldMainImage, setShowOldMainImage] = useState<boolean>(true);
-  const [showOldSubImage, setShowOldSubImage] = useState<boolean>(true);
+  const [mainFileMediaPath, setMainFileMediaPath] = useState('');
 
   useEffect(() => {
     setIsLoading(true);
@@ -53,11 +55,75 @@ export const PrivacyPolicy = () => {
     });
   }, []);
 
-  const confirmAddBreeder = (values: any) => {
+  const confirmUpdatePrivacyPolicy = async (values: any) => {
     setIsLoading(true);
+    let mainFilePath = '';
+
+    try {
+      if (file != null) {
+        const formData = new FormData();
+
+        formData.append('file', file);
+        const data = {
+          File: file,
+          MediaType: 1,
+          Directory: 9,
+        };
+        const mediaResponse = await axios.post(
+          `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`,
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              'Content-Type': 'multipart/form-data',
+            },
+          },
+        );
+
+        if (mediaResponse.status === 200) {
+          setMainFileMediaPath(mediaResponse.data.path);
+          mainFilePath = mediaResponse.data.path;
+        }
+      }
+      const formData = new FormData();
+
+      // Append form fields to FormData
+      formData.append('Id', '1');
+      formData.append(
+        'MainImagePath',
+        mainFilePath.length != 0 ? mainFilePath : values.mainImage,
+      ); // Attach file if exists, otherwise use current image
+      formData.append('Title', values.title);
+      formData.append('Description', values.description);
+
+      // Send the PUT request
+      const updateResponse = await fetch(
+        `${BaseURL.SmarterAspNetBase}${END_POINTS.UPDATE_ABOUT_US}`,
+        {
+          method: 'PUT',
+          headers: {
+            accept: '*/*',
+            authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+          body: formData,
+        },
+      );
+      if (updateResponse.status === 200) {
+        toast.success('Operation completed successfully');
+
+        navigate('/');
+      } else {
+        toast.error('Something went wrong ..!');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('An error occurred while processing your request.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleChangeHeroSection = (
+  const handleChangePrivacyPolicy = (
     value: string | number | boolean,
     field: string,
     setValues: FormikHelpers<any>['setValues'],
@@ -83,13 +149,7 @@ export const PrivacyPolicy = () => {
     }
   };
 
-  const removeUpload = () => {
-    setFile(null);
-    setImageUploadWrapClass('image-upload-wrap');
-    setFileUploadContentVisible(false);
-    setShowOldMainImage(false); // Hide the old main image
-  };
-  const readURL = (input: any) => {
+  const readURL = (input: any, value, setFieldValue) => {
     if (input.files && input.files[0]) {
       const reader = new FileReader();
 
@@ -97,27 +157,11 @@ export const PrivacyPolicy = () => {
         setImageUploadWrapClass('image-upload-wrap image-dropping');
         setFileUploadContentVisible(true);
         setFile(input.files[0]);
+        setFieldValue('mainImage', input.files[0]);
       };
 
       reader.readAsDataURL(input.files[0]);
     } else {
-      removeUpload();
-    }
-  };
-
-  const readSubImageURL = (input: any) => {
-    if (input.files && input.files[0]) {
-      const reader = new FileReader();
-
-      reader.onload = (e) => {
-        setImageUploadWrapClass('image-upload-wrap image-dropping');
-        setSubFileUploadContentVisible(true);
-        setSubFile(input.files[0]);
-      };
-
-      reader.readAsDataURL(input.files[0]);
-    } else {
-      removeUpload();
     }
   };
 
@@ -127,6 +171,12 @@ export const PrivacyPolicy = () => {
 
   const handleDragLeave = () => {
     setImageUploadWrapClass('image-upload-wrap');
+  };
+  const handleDeleteMainImage = (values, setFieldValue) => {
+    // Set the mainImage value to an empty string
+    setFieldValue('mainImage', '');
+    // Hide the old main image
+    setShowOldMainImage(false);
   };
 
   return (
@@ -138,14 +188,13 @@ export const PrivacyPolicy = () => {
           {/* <!-- Contact Form --> */}
           <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
             <Formik
-              onSubmit={(values) => confirmAddBreeder(values)}
+              onSubmit={(values) => confirmUpdatePrivacyPolicy(values)}
               enableReinitialize
               initialValues={{
                 mainImage: apiResponse?.mainImage,
                 title: apiResponse?.title,
                 description: apiResponse?.description,
               }}
-              // validationSchema={validationSchema}
               key={`PrivacyPolicy`}
               validationSchema={validationSchema}
             >
@@ -176,7 +225,7 @@ export const PrivacyPolicy = () => {
                           onChange={(e) => {
                             handleChange(e);
 
-                            handleChangeHeroSection(
+                            handleChangePrivacyPolicy(
                               e.target.value,
                               'title',
                               setValues,
@@ -185,6 +234,11 @@ export const PrivacyPolicy = () => {
                           onBlur={handleBlur}
                           value={values.title}
                         />
+                        {touched.title && errors.title && (
+                          <div className="text-red-500 text-sm mt-1">
+                            {errors.title}
+                          </div>
+                        )}
                       </div>
 
                       {/* description */}
@@ -192,8 +246,7 @@ export const PrivacyPolicy = () => {
                         <label className="mb-2.5 block text-black dark:text-white">
                           Description
                         </label>
-                        <input
-                          type="text"
+                        <textarea
                           placeholder="Enter your sub title here"
                           className="w-3/4 rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                           name="description"
@@ -201,7 +254,7 @@ export const PrivacyPolicy = () => {
                           onChange={(e) => {
                             handleChange(e);
 
-                            handleChangeHeroSection(
+                            handleChangePrivacyPolicy(
                               e.target.value,
                               'description',
                               setValues,
@@ -210,6 +263,11 @@ export const PrivacyPolicy = () => {
                           onBlur={handleBlur}
                           value={values.description}
                         />
+                        {touched.description && errors.description && (
+                          <div className="text-red-500 text-sm mt-1">
+                            {errors.description}
+                          </div>
+                        )}
                       </div>
 
                       {/* Old Main Image Preview */}
@@ -266,7 +324,9 @@ export const PrivacyPolicy = () => {
                             {showOldMainImage && (
                               <button
                                 className="text-sm hover:text-primary"
-                                onClick={() => setShowOldMainImage(false)}
+                                onClick={() =>
+                                  handleDeleteMainImage(values, setFieldValue)
+                                }
                               >
                                 Delete
                               </button>
@@ -274,7 +334,11 @@ export const PrivacyPolicy = () => {
                           </span>
                         </div>
                       </div>
-
+                      {touched.mainImage && errors.mainImage && (
+                        <div className="text-red-500 text-sm mt-1">
+                          {errors.mainImage}
+                        </div>
+                      )}
                       {showOldMainImage && (
                         <>
                           <div className="w-f mb-5.5 block">
@@ -303,7 +367,9 @@ export const PrivacyPolicy = () => {
                               onDragLeave={() => handleDragLeave()}
                               className="absolute inset-0 z-50 m-0 h-full w-full cursor-pointer p-0 opacity-0 outline-none"
                               type="file"
-                              onChange={(e) => readURL(e.target)}
+                              onChange={(e) =>
+                                readURL(e.target, values, setFieldValue)
+                              }
                               accept="image/*"
                             />
                             <div className="flex flex-col items-center justify-center space-y-3">

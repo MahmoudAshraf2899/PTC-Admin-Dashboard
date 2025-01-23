@@ -22,24 +22,22 @@ interface ApiResponse {
 }
 
 const validationSchema = Yup.object().shape({
-  farmArea: Yup.string()
-    .matches(/^(?![1-9]$)\d+$/, 'من فضلك قم بإدخال رقم اكبر من 9')
-    .required('من فضلك قم بإدخال مساحة العنبر'),
+  title: Yup.string().required('title is required'),
+  mainImage: Yup.mixed().required('Image is required'),
 });
-
 export const Constructions = () => {
+  const navigate = useNavigate();
+
   const [isLoading, setIsLoading] = useState(false);
   const [apiResponse, setApiResponse] = useState<ApiResponse | null>(null);
   const [file, setFile] = useState<File | null>(null);
-  const [subFile, setSubFile] = useState<File | null>(null);
   const [imageUploadWrapClass, setImageUploadWrapClass] =
     useState('image-upload-wrap');
   const [fileUploadContentVisible, setFileUploadContentVisible] =
     useState(false);
-  const [subFileUploadContentVisible, setSubFileUploadContentVisible] =
-    useState(false);
+
   const [showOldMainImage, setShowOldMainImage] = useState<boolean>(true);
-  const [showOldSubImage, setShowOldSubImage] = useState<boolean>(true);
+  const [mainFileMediaPath, setMainFileMediaPath] = useState('');
 
   useEffect(() => {
     setIsLoading(true);
@@ -52,11 +50,75 @@ export const Constructions = () => {
     });
   }, []);
 
-  const confirmAddBreeder = (values: any) => {
+  const confirmUpdateConstruction = async (values: any) => {
     setIsLoading(true);
+
+    let mainFilePath = '';
+
+    try {
+      if (file != null) {
+        const formData = new FormData();
+
+        formData.append('file', file);
+        const data = {
+          File: file,
+          MediaType: 1,
+          Directory: 3,
+        };
+        const mediaResponse = await axios.post(
+          `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`,
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              'Content-Type': 'multipart/form-data',
+            },
+          },
+        );
+
+        if (mediaResponse.status === 200) {
+          setMainFileMediaPath(mediaResponse.data.path);
+          mainFilePath = mediaResponse.data.path;
+        }
+      }
+      const formData = new FormData();
+
+      // Append form fields to FormData
+      formData.append('Id', '1');
+      formData.append(
+        'MainImage',
+        mainFilePath.length != 0 ? mainFilePath : values.mainImage,
+      ); // Attach file if exists, otherwise use current image
+      formData.append('Title', values.title);
+
+      // Send the PUT request
+      const updateResponse = await fetch(
+        `${BaseURL.SmarterAspNetBase}${END_POINTS.UPDATE_CONSTRUCTIONS}`,
+        {
+          method: 'PUT',
+          headers: {
+            accept: '*/*',
+            authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+          body: formData,
+        },
+      );
+      if (updateResponse.status === 200) {
+        toast.success('Operation completed successfully');
+
+        navigate('/');
+      } else {
+        toast.error('Something went wrong ..!');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('An error occurred while processing your request.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleChangeHeroSection = (
+  const handleChangeConstruction = (
     value: string | number | boolean,
     field: string,
     setValues: FormikHelpers<any>['setValues'],
@@ -88,7 +150,7 @@ export const Constructions = () => {
     setFileUploadContentVisible(false);
     setShowOldMainImage(false); // Hide the old main image
   };
-  const readURL = (input: any) => {
+  const readURL = (input: any, value, setFieldValue) => {
     if (input.files && input.files[0]) {
       const reader = new FileReader();
 
@@ -96,27 +158,11 @@ export const Constructions = () => {
         setImageUploadWrapClass('image-upload-wrap image-dropping');
         setFileUploadContentVisible(true);
         setFile(input.files[0]);
+        setFieldValue('mainImage', input.files[0]);
       };
 
       reader.readAsDataURL(input.files[0]);
     } else {
-      removeUpload();
-    }
-  };
-
-  const readSubImageURL = (input: any) => {
-    if (input.files && input.files[0]) {
-      const reader = new FileReader();
-
-      reader.onload = (e) => {
-        setImageUploadWrapClass('image-upload-wrap image-dropping');
-        setSubFileUploadContentVisible(true);
-        setSubFile(input.files[0]);
-      };
-
-      reader.readAsDataURL(input.files[0]);
-    } else {
-      removeUpload();
     }
   };
 
@@ -128,6 +174,13 @@ export const Constructions = () => {
     setImageUploadWrapClass('image-upload-wrap');
   };
 
+  const handleDeleteMainImage = (values, setFieldValue) => {
+    // Set the mainImage value to an empty string
+    setFieldValue('mainImage', '');
+    // Hide the old main image
+    setShowOldMainImage(false);
+  };
+
   return (
     <>
       <Breadcrumb pageName="Constructions Page" />
@@ -137,7 +190,7 @@ export const Constructions = () => {
           {/* <!-- Contact Form --> */}
           <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
             <Formik
-              onSubmit={(values) => confirmAddBreeder(values)}
+              onSubmit={(values) => confirmUpdateConstruction(values)}
               enableReinitialize
               initialValues={{
                 mainImage: apiResponse?.mainImage,
@@ -174,7 +227,7 @@ export const Constructions = () => {
                           onChange={(e) => {
                             handleChange(e);
 
-                            handleChangeHeroSection(
+                            handleChangeConstruction(
                               e.target.value,
                               'title',
                               setValues,
@@ -183,6 +236,11 @@ export const Constructions = () => {
                           onBlur={handleBlur}
                           value={values.title}
                         />
+                        {touched.title && errors.title && (
+                          <div className="text-red-500 text-sm mt-1">
+                            {errors.title}
+                          </div>
+                        )}
                       </div>
 
                       {/* Old Main Image Preview */}
@@ -239,7 +297,9 @@ export const Constructions = () => {
                             {showOldMainImage && (
                               <button
                                 className="text-sm hover:text-primary"
-                                onClick={() => setShowOldMainImage(false)}
+                                onClick={() =>
+                                  handleDeleteMainImage(values, setFieldValue)
+                                }
                               >
                                 Delete
                               </button>
@@ -247,7 +307,11 @@ export const Constructions = () => {
                           </span>
                         </div>
                       </div>
-
+                      {touched.mainImage && errors.mainImage && (
+                        <div className="text-red-500 text-sm mt-1">
+                          {errors.mainImage}
+                        </div>
+                      )}
                       {showOldMainImage && (
                         <>
                           <div className="w-f mb-5.5 block">
@@ -276,7 +340,9 @@ export const Constructions = () => {
                               onDragLeave={() => handleDragLeave()}
                               className="absolute inset-0 z-50 m-0 h-full w-full cursor-pointer p-0 opacity-0 outline-none"
                               type="file"
-                              onChange={(e) => readURL(e.target)}
+                              onChange={(e) =>
+                                readURL(e.target, values, setFieldValue)
+                              }
                               accept="image/*"
                             />
                             <div className="flex flex-col items-center justify-center space-y-3">

@@ -23,25 +23,24 @@ interface ApiResponse {
 }
 
 const validationSchema = Yup.object().shape({
-  title: Yup.string().required('please add title'), // Required validation for title
-  description: Yup.string().required('Please add description'), // Required validation for description
+  title: Yup.string().required('title is required'),
+  description: Yup.string().required('description is required'),
 
-  mainImage: Yup.mixed().required('Main Image is required'),
+  mainImage: Yup.mixed().required('Image is required'),
 });
 
 export const AdSection = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [apiResponse, setApiResponse] = useState<ApiResponse | null>(null);
   const [file, setFile] = useState<File | null>(null);
-  const [subFile, setSubFile] = useState<File | null>(null);
   const [imageUploadWrapClass, setImageUploadWrapClass] =
     useState('image-upload-wrap');
   const [fileUploadContentVisible, setFileUploadContentVisible] =
     useState(false);
-  const [subFileUploadContentVisible, setSubFileUploadContentVisible] =
-    useState(false);
+
   const [showOldMainImage, setShowOldMainImage] = useState<boolean>(true);
-  const [showOldSubImage, setShowOldSubImage] = useState<boolean>(true);
+  const [mainFileMediaPath, setMainFileMediaPath] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     setIsLoading(true);
@@ -55,11 +54,77 @@ export const AdSection = () => {
     });
   }, []);
 
-  const confirmAddBreeder = (values: any) => {
+  const confirmUpdateAD = async (values: any) => {
     setIsLoading(true);
+    let mainFilePath = '';
+
+    try {
+      if (file != null) {
+        const formData = new FormData();
+
+        formData.append('file', file);
+        const data = {
+          File: file,
+          MediaType: 1,
+          Directory: 7,
+        };
+        const mediaResponse = await axios.post(
+          `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`,
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              'Content-Type': 'multipart/form-data',
+            },
+          },
+        );
+
+        if (mediaResponse.status === 200) {
+          setMainFileMediaPath(mediaResponse.data.path);
+          mainFilePath = mediaResponse.data.path;
+        }
+      }
+      const formData = new FormData();
+
+      // Append form fields to FormData
+      formData.append('Id', '1');
+      formData.append(
+        'MainImage',
+        mainFilePath.length != 0 ? mainFilePath : values.mainImage,
+      ); // Attach file if exists, otherwise use current image
+      formData.append('Title', values.title);
+      formData.append('Description', values.description);
+
+      formData.append('IsActive', values.isActive ? 'true' : 'false');
+
+      // Send the PUT request
+      const updateResponse = await fetch(
+        `${BaseURL.SmarterAspNetBase}${END_POINTS.UPDATE_AD_SECTION}`,
+        {
+          method: 'PUT',
+          headers: {
+            accept: '*/*',
+            authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+          body: formData,
+        },
+      );
+      if (updateResponse.status === 200) {
+        toast.success('Operation completed successfully');
+
+        navigate('/');
+      } else {
+        toast.error('Something went wrong ..!');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('An error occurred while processing your request.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleChangeHeroSection = (
+  const handleChangeAD = (
     value: string | number | boolean,
     field: string,
     setValues: FormikHelpers<any>['setValues'],
@@ -85,12 +150,6 @@ export const AdSection = () => {
     }
   };
 
-  const removeUpload = () => {
-    setFile(null);
-    setImageUploadWrapClass('image-upload-wrap');
-    setFileUploadContentVisible(false);
-    setShowOldMainImage(false); // Hide the old main image
-  };
   const readURL = (input: any, value, setFieldValue) => {
     if (input.files && input.files[0]) {
       const reader = new FileReader();
@@ -103,6 +162,7 @@ export const AdSection = () => {
       };
 
       reader.readAsDataURL(input.files[0]);
+    } else {
     }
   };
 
@@ -130,7 +190,7 @@ export const AdSection = () => {
           {/* <!-- Contact Form --> */}
           <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
             <Formik
-              onSubmit={(values) => confirmAddBreeder(values)}
+              onSubmit={(values) => confirmUpdateAD(values)}
               enableReinitialize
               initialValues={{
                 isActive: apiResponse?.isActive,
@@ -138,7 +198,6 @@ export const AdSection = () => {
                 title: apiResponse?.title,
                 description: apiResponse?.description,
               }}
-              // validationSchema={validationSchema}
               key={`AdSection`}
               validationSchema={validationSchema}
             >
@@ -169,11 +228,7 @@ export const AdSection = () => {
                           onChange={(e) => {
                             handleChange(e);
 
-                            handleChangeHeroSection(
-                              e.target.value,
-                              'title',
-                              setValues,
-                            );
+                            handleChangeAD(e.target.value, 'title', setValues);
                           }}
                           onBlur={handleBlur}
                           value={values.title}
@@ -190,16 +245,15 @@ export const AdSection = () => {
                         <label className="mb-2.5 block text-black dark:text-white">
                           Description
                         </label>
-                        <input
-                          type="text"
+                        <textarea
                           placeholder="Enter your description here"
-                          className="w-3/4 rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                           name="description"
                           id="description"
                           onChange={(e) => {
                             handleChange(e);
 
-                            handleChangeHeroSection(
+                            handleChangeAD(
                               e.target.value,
                               'description',
                               setValues,
@@ -227,7 +281,7 @@ export const AdSection = () => {
                               onChange={(e) => {
                                 handleChange(e);
 
-                                handleChangeHeroSection(
+                                handleChangeAD(
                                   e.target.value,
                                   'isActive',
                                   setValues,
@@ -324,7 +378,11 @@ export const AdSection = () => {
                           </span>
                         </div>
                       </div>
-
+                      {touched.mainImage && errors.mainImage && (
+                        <div className="text-red-500 text-sm mt-1">
+                          {errors.mainImage}
+                        </div>
+                      )}
                       {showOldMainImage && (
                         <>
                           <div className="w-f mb-5.5 block">
@@ -412,11 +470,6 @@ export const AdSection = () => {
                             )}
                           </div>
                         </>
-                      )}
-                      {touched.mainImage && errors.mainImage && (
-                        <div className="text-red-500 text-sm mt-1">
-                          {errors.mainImage}
-                        </div>
                       )}
                       <button className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90">
                         Save

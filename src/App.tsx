@@ -30,6 +30,7 @@ import { Constructions } from './pages/Constructions/Constructions';
 import { Developments } from './pages/Developments/Developments';
 import Users from './pages/Users/Users';
 import AddUser from './pages/Users/AddUser';
+import { EditUser } from './pages/Users/EditUser';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -175,6 +176,15 @@ function App() {
               <>
                 <PageTitle title="Add User Page  | PTC - Admin Dashboard" />
                 <AddUser />
+              </>
+            }
+          />
+          <Route
+            path="/EditUser/:id"
+            element={
+              <>
+                <PageTitle title="Edit User | PTC - Admin Dashboard" />
+                <EditUser />
               </>
             }
           />

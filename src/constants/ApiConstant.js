@@ -22,5 +22,7 @@ export const END_POINTS = {
   UPDATE_GUARANTEE_SECTION: 'api/admin/GuaranteeSection',
   GET_USERS: 'api/admin/User/Search',
   BAN_USER: 'api/admin/User/BanUser',
+  ACTIVE_USER: 'api/User/ActiveUser',
   ADD_USER: 'api/User',
+  GET_USER_BY_ID: 'api/User',
 };

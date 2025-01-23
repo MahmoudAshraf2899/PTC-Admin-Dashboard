@@ -20,4 +20,7 @@ export const END_POINTS = {
   UPDATE_AD_SECTION: 'api/admin/AdSection',
   GET_GUARANTEE_SECTION: 'api/admin/GuaranteeSection',
   UPDATE_GUARANTEE_SECTION: 'api/admin/GuaranteeSection',
+  GET_USERS: 'api/admin/User/Search',
+  BAN_USER: 'api/admin/User/BanUser',
+  ADD_USER: 'api/User',
 };

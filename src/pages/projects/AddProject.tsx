@@ -205,7 +205,7 @@ const AddProject: React.FC = () => {
 
       if (projectResponse.status === 200) {
         toast.success('Operation completed successfully');
-        navigate(-1);
+        navigate('/projects');
       } else {
         toast.error('Something went wrong ..!');
       }

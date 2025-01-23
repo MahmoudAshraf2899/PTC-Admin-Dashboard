@@ -28,6 +28,8 @@ import { AboutUs } from './pages/AboutUs/AboutUs';
 import { PrivacyPolicy } from './pages/PrivacyPolicy/PrivacyPolicy';
 import { Constructions } from './pages/Constructions/Constructions';
 import { Developments } from './pages/Developments/Developments';
+import Users from './pages/Users/Users';
+import AddUser from './pages/Users/AddUser';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -155,6 +157,24 @@ function App() {
               <>
                 <PageTitle title="Developments Page  | PTC - Admin Dashboard" />
                 <Developments />
+              </>
+            }
+          />
+          <Route
+            path="/users"
+            element={
+              <>
+                <PageTitle title="Users Page  | PTC - Admin Dashboard" />
+                <Users />
+              </>
+            }
+          />
+          <Route
+            path="/AddUser"
+            element={
+              <>
+                <PageTitle title="Add User Page  | PTC - Admin Dashboard" />
+                <AddUser />
               </>
             }
           />

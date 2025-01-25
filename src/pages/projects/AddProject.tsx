@@ -25,10 +25,8 @@ const validationSchema = Yup.object().shape({
 const AddProject: React.FC = () => {
   const navigate = useNavigate();
   const [files, setFiles] = useState<FilePreview[]>([]);
-  const [mediaUID, setMediaUID] = useState<string[]>([]);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [mainImageUID, setMainImageUID] = useState('');
   const [projectTypeId, setProjectTypeId] = useState('1');
 
   const [mainFile, setMainFile] = useState<File | null>(null);
@@ -58,9 +56,15 @@ const AddProject: React.FC = () => {
     }));
     setFiles((prevFiles) => [...prevFiles, ...newFiles]);
   };
-
+  const onDropRejected = (fileRejections: any[]) => {
+    fileRejections.forEach((file) => {
+      // Display an error message for each rejected file
+      toast.error(`${file.file.name} is not a valid image or video.`);
+    });
+  };
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
+    onDropRejected,
     accept: {
       'image/*': ['.jpeg', '.jpg', '.png', '.gif'],
       'video/*': ['.mp4', '.mkv', '.mov'],
@@ -98,6 +102,14 @@ const AddProject: React.FC = () => {
 
   const readMainImageURL = (input: any) => {
     if (input.files && input.files[0]) {
+      const file = input.files[0];
+
+      // Check if the file is an image
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please upload only image files.');
+        removeUpload();
+        return;
+      }
       const reader = new FileReader();
 
       reader.onload = (e) => {

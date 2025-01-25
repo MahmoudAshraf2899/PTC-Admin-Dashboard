@@ -217,7 +217,7 @@ export const EditUser = () => {
                             );
                           }}
                           onBlur={handleBlur}
-                          defaultValue={values.firstName}
+                          value={values.firstName}
                         />
                         {touched.firstName && errors.firstName && (
                           <div className="text-red-500 text-sm mt-1">
@@ -247,7 +247,7 @@ export const EditUser = () => {
                             );
                           }}
                           onBlur={handleBlur}
-                          defaultValue={values.lastName}
+                          value={values.lastName}
                         />
                         {touched.lastName && errors.lastName && (
                           <div className="text-red-500 text-sm mt-1">
@@ -277,7 +277,7 @@ export const EditUser = () => {
                             );
                           }}
                           onBlur={handleBlur}
-                          defaultValue={values.email}
+                          value={values.email}
                         />
                         {touched.email && errors.email && (
                           <div className="text-red-500 text-sm mt-1">
@@ -307,7 +307,7 @@ export const EditUser = () => {
                             );
                           }}
                           onBlur={handleBlur}
-                          defaultValue={values.phoneNumber}
+                          value={values.phoneNumber}
                         />
                         {touched.phoneNumber && errors.phoneNumber && (
                           <div className="text-red-500 text-sm mt-1">

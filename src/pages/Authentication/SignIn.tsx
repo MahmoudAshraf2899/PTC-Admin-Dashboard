@@ -35,6 +35,7 @@ const SignIn: React.FC = () => {
 
           localStorage.setItem('token', response.data.data.accessToken);
           localStorage.setItem('fullName', response.data.data.fullName);
+          localStorage.setItem('email', response.data.data.email);
           localStorage.setItem('id', response.data.data.id);
           auth?.login(userType);
 
@@ -220,7 +221,7 @@ const SignIn: React.FC = () => {
                         <input
                           type="text"
                           onChange={(e) => setUserName(e.target.value)}
-                          placeholder="Enter your email"
+                          placeholder="Enter your user name"
                           className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                         />
 

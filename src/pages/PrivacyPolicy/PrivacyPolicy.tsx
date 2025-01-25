@@ -98,7 +98,7 @@ export const PrivacyPolicy = () => {
 
       // Send the PUT request
       const updateResponse = await fetch(
-        `${BaseURL.SmarterAspNetBase}${END_POINTS.UPDATE_ABOUT_US}`,
+        `${BaseURL.SmarterAspNetBase}${END_POINTS.UPDATE_PRIVACY_POLICY}`,
         {
           method: 'PUT',
           headers: {

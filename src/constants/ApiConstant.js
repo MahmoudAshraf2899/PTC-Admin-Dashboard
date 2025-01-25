@@ -25,4 +25,6 @@ export const END_POINTS = {
   ACTIVE_USER: 'api/User/ActiveUser',
   ADD_USER: 'api/User',
   GET_USER_BY_ID: 'api/User',
+  SHOW_PROFILE: 'api/User/ShowProfile',
+  UPDATE_PROFILE: 'api/User/UpdateProfile',
 };

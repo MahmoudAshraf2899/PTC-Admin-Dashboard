@@ -22,12 +22,13 @@ interface ApiResponse {
 }
 
 const validationSchema = Yup.object().shape({
-  farmArea: Yup.string()
-    .matches(/^(?![1-9]$)\d+$/, 'من فضلك قم بإدخال رقم اكبر من 9')
-    .required('من فضلك قم بإدخال مساحة العنبر'),
+  title: Yup.string().required('title is required'),
+  mainImage: Yup.mixed().required('Image is required'),
 });
 
 export const Developments = () => {
+  const navigate = useNavigate();
+
   const [isLoading, setIsLoading] = useState(false);
   const [apiResponse, setApiResponse] = useState<ApiResponse | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -40,6 +41,7 @@ export const Developments = () => {
     useState(false);
   const [showOldMainImage, setShowOldMainImage] = useState<boolean>(true);
   const [showOldSubImage, setShowOldSubImage] = useState<boolean>(true);
+  const [mainFileMediaPath, setMainFileMediaPath] = useState('');
 
   useEffect(() => {
     setIsLoading(true);
@@ -52,8 +54,72 @@ export const Developments = () => {
     });
   }, []);
 
-  const confirmAddBreeder = (values: any) => {
+  const confirmUpdateDevelopment = async (values: any) => {
     setIsLoading(true);
+
+    let mainFilePath = '';
+
+    try {
+      if (file != null) {
+        const formData = new FormData();
+
+        formData.append('file', file);
+        const data = {
+          File: file,
+          MediaType: 1,
+          Directory: 3,
+        };
+        const mediaResponse = await axios.post(
+          `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`,
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              'Content-Type': 'multipart/form-data',
+            },
+          },
+        );
+
+        if (mediaResponse.status === 200) {
+          setMainFileMediaPath(mediaResponse.data.path);
+          mainFilePath = mediaResponse.data.path;
+        }
+      }
+      const formData = new FormData();
+
+      // Append form fields to FormData
+      formData.append('Id', '1');
+      formData.append(
+        'MainImage',
+        mainFilePath.length != 0 ? mainFilePath : values.mainImage,
+      ); // Attach file if exists, otherwise use current image
+      formData.append('Title', values.title);
+
+      // Send the PUT request
+      const updateResponse = await fetch(
+        `${BaseURL.SmarterAspNetBase}${END_POINTS.UPDATE_DEVELOPMENT}`,
+        {
+          method: 'PUT',
+          headers: {
+            accept: '*/*',
+            authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+          body: formData,
+        },
+      );
+      if (updateResponse.status === 200) {
+        toast.success('Operation completed successfully');
+
+        navigate('/');
+      } else {
+        toast.error('Something went wrong ..!');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('An error occurred while processing your request.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleChangeHeroSection = (
@@ -137,13 +203,12 @@ export const Developments = () => {
           {/* <!-- Contact Form --> */}
           <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
             <Formik
-              onSubmit={(values) => confirmAddBreeder(values)}
+              onSubmit={(values) => confirmUpdateDevelopment(values)}
               enableReinitialize
               initialValues={{
                 mainImage: apiResponse?.mainImage,
                 title: apiResponse?.title,
               }}
-              // validationSchema={validationSchema}
               key={`Developments`}
               validationSchema={validationSchema}
             >

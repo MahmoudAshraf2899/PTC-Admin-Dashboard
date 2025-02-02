@@ -155,6 +155,7 @@ const GuaranteeSection = () => {
           }
         }
       }
+
       values.id = 1;
       // Use updated children with uploaded paths
       let payload = {
@@ -285,7 +286,7 @@ const GuaranteeSection = () => {
                   <div className="flex items-center gap-3">
                     {/* Show Preview if Icon Exists */}
                     {child.icon ? (
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-4 ">
                         <img
                           src={
                             child.icon.startsWith('\\') ||
@@ -294,7 +295,7 @@ const GuaranteeSection = () => {
                               : child.icon // If it's a local file URL, use the direct URL
                           }
                           alt="Icon Preview"
-                          className="h-20 w-20 object-cover rounded"
+                          className="h-20 w-20 object-cover rounded bg-black-2"
                         />
                         <button
                           type="button"

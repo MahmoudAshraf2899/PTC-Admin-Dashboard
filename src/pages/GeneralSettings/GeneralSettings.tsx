@@ -22,6 +22,12 @@ const EmailValidationSchema = Yup.object({
     .required('Email is required')
     .email('Invalid email format'),
 });
+
+const PhoneNumberValidationSchema = Yup.object({
+  phone: Yup.string()
+    .required('Phone number is required')
+    .matches(/^\d{11}$/, 'Phone number must be exactly 11 digits'),
+});
 export const GeneralSettings = () => {
   const navigate = useNavigate();
   const [fileUploadContentVisible, setFileUploadContentVisible] =
@@ -227,6 +233,34 @@ export const GeneralSettings = () => {
     }
   };
 
+  const confirmUpdatePhoneNumber = async (values: any) => {
+    setIsLoading(true);
+
+    try {
+      let payload = {
+        key: 'phone',
+        value: values.phone,
+      };
+      setIsLoading(true);
+
+      await API.put(`${END_POINTS.UPDATE_GENERAL_SETTINGS}`, payload).then(
+        (res) => {
+          setIsLoading(true);
+          if (res.status == 200) {
+            toast.success('Operation completed successfully');
+            navigate('/');
+          } else {
+            toast.error(res.data.message);
+          }
+        },
+      );
+    } catch (error) {
+      setIsLoading(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <>
       {isLoading == true ? (
@@ -282,7 +316,7 @@ export const GeneralSettings = () => {
                                     : introductionVideoResponse.value
                                 }
                                 title="Construction Promo Video | Construction Company | TranStudio | Vapi"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allow="accelerometer;  clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                                 referrerPolicy="strict-origin-when-cross-origin"
                                 allowFullScreen
                               ></iframe>
@@ -399,6 +433,81 @@ export const GeneralSettings = () => {
                                 onBlur={handleBlur}
                                 value={values.email}
                               />
+                              {touched.email && errors.email && (
+                                <div className="text-red-500 text-sm mt-1">
+                                  {errors.email}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          type="submit"
+                          className="w-full rounded bg-primary py-3 px-4 text-white hover:bg-primary-dark"
+                        >
+                          Save
+                        </button>
+                      </form>
+                    </>
+                  )}
+                </Formik>
+              </div>
+            </div>
+
+            {/* Footer Phone Number Form */}
+            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+              <div className="  border-stroke py-4 px-4 sm:px-7 dark:border-strokedark">
+                <h3 className="text-lg font-medium text-black dark:text-white">
+                  Phone Number
+                </h3>
+              </div>
+              <div className="p-4 sm:p-7">
+                <Formik
+                  onSubmit={(values) => confirmUpdatePhoneNumber(values)}
+                  enableReinitialize
+                  initialValues={{
+                    phone: phoneNumberResponse?.value,
+                  }}
+                  key={`PhoneNumber`}
+                  validationSchema={PhoneNumberValidationSchema}
+                >
+                  {({
+                    values,
+                    errors,
+                    touched,
+                    handleChange,
+                    handleBlur,
+                    handleSubmit,
+                    setFieldValue,
+                    setValues,
+                  }) => (
+                    <>
+                      <form onSubmit={handleSubmit}>
+                        <div className="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
+                          {/* Phone Number */}
+                          <div>
+                            <label className="mb-2 block text-sm font-medium text-black dark:text-white">
+                              Phone Number
+                            </label>
+                            <div className="relative">
+                              <input
+                                className="w-full rounded border border-stroke bg-gray py-3 px-4 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
+                                type="text"
+                                name="phone"
+                                id="phone"
+                                onChange={(e) => {
+                                  handleChange(e);
+                                  setFieldValue('phone', e.target.value); // Ensure Formik state updates
+                                }}
+                                onBlur={handleBlur}
+                                value={values.phone}
+                              />
+                              {touched.phone && errors.phone && (
+                                <div className="text-red-500 text-sm mt-1">
+                                  {errors.phone}
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>

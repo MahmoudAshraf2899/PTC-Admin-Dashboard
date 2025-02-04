@@ -31,6 +31,7 @@ import { Developments } from './pages/Developments/Developments';
 import Users from './pages/Users/Users';
 import AddUser from './pages/Users/AddUser';
 import { EditUser } from './pages/Users/EditUser';
+import { GeneralSettings } from './pages/GeneralSettings/GeneralSettings';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -193,17 +194,17 @@ function App() {
             path="/profile"
             element={
               <>
-                <PageTitle title="My Profile | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+                <PageTitle title="My Profile | PTC Admin Dashboard" />
                 <Settings />
               </>
             }
           />
           <Route
-            path="/chart"
+            path="/general-settings"
             element={
               <>
-                <PageTitle title="Basic Chart | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-                <Chart />
+                <PageTitle title="General Settings | PTC Admin Dashboard" />
+                <GeneralSettings />
               </>
             }
           />

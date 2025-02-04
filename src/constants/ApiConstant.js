@@ -28,4 +28,11 @@ export const END_POINTS = {
   GET_USER_BY_ID: 'api/User',
   SHOW_PROFILE: 'api/User/ShowProfile',
   UPDATE_PROFILE: 'api/User/UpdateProfile',
+  INTRO_VIDEO: 'api/admin/AppSetting/introduction_video',
+  PHONE_NUMBER: 'api/admin/AppSetting/phone',
+  LOCATION: 'api/admin/AppSetting/location',
+  GOOGLE_MAPS_LOCATION: 'api/admin/AppSetting/google_maps_location',
+  FOOTER_EMAIL: 'api/admin/AppSetting/footer_email',
+  FOOTER_TITLE: 'api/admin/AppSetting/footer_title',
+  UPDATE_GENERAL_SETTINGS: 'api/admin/AppSetting',
 };

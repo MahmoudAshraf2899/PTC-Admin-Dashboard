@@ -32,6 +32,7 @@ import Users from './pages/Users/Users';
 import AddUser from './pages/Users/AddUser';
 import { EditUser } from './pages/Users/EditUser';
 import { GeneralSettings } from './pages/GeneralSettings/GeneralSettings';
+import SocialMedia from './pages/SocialMedia/SocialMedia';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -205,6 +206,16 @@ function App() {
               <>
                 <PageTitle title="General Settings | PTC Admin Dashboard" />
                 <GeneralSettings />
+              </>
+            }
+          />
+
+          <Route
+            path="/socailmedia"
+            element={
+              <>
+                <PageTitle title="Social Media | PTC Admin Dashboard" />
+                <SocialMedia />
               </>
             }
           />

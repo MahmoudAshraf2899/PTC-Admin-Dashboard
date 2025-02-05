@@ -28,6 +28,22 @@ const PhoneNumberValidationSchema = Yup.object({
     .required('Phone number is required')
     .matches(/^\d{11}$/, 'Phone number must be exactly 11 digits'),
 });
+const FooterTitleValidationSchema = Yup.object({
+  title: Yup.string()
+    .required('Footer title is required')
+    .min(50, 'Footer Title must be at least 50 characters')
+    .max(150, 'Footer Title must be at most 150 characters'),
+});
+
+const LocationValidationSchema = Yup.object({
+  location: Yup.string()
+    .required('Location is required')
+    .min(10, 'Location must be at least 10 characters')
+    .max(100, 'Location must be at most 150 characters'),
+  google_maps_location: Yup.string().required(
+    'Google MapsLocation is required',
+  ),
+});
 export const GeneralSettings = () => {
   const navigate = useNavigate();
   const [fileUploadContentVisible, setFileUploadContentVisible] =
@@ -261,6 +277,78 @@ export const GeneralSettings = () => {
     }
   };
 
+  const confirmUpdateFooterTitle = async (values: any) => {
+    setIsLoading(true);
+
+    try {
+      let payload = {
+        key: 'footer_title',
+        value: values.title,
+      };
+      setIsLoading(true);
+
+      await API.put(`${END_POINTS.UPDATE_GENERAL_SETTINGS}`, payload).then(
+        (res) => {
+          setIsLoading(true);
+          if (res.status == 200) {
+            toast.success('Operation completed successfully');
+            navigate('/');
+          } else {
+            toast.error(res.data.message);
+          }
+        },
+      );
+    } catch (error) {
+      setIsLoading(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const confirmUpdateLocation = async (values: any) => {
+    setIsLoading(true);
+
+    try {
+      let payload = {
+        key: 'location',
+        value: values.location,
+      };
+
+      let googleMapsPayload = {
+        key: 'google_maps_location',
+        value: values.google_maps_location,
+      };
+      setIsLoading(true);
+
+      await API.put(`${END_POINTS.UPDATE_GENERAL_SETTINGS}`, payload).then(
+        (res) => {
+          setIsLoading(true);
+          if (res.status == 200) {
+          } else {
+            toast.error(res.data.message);
+          }
+        },
+      );
+
+      await API.put(
+        `${END_POINTS.UPDATE_GENERAL_SETTINGS}`,
+        googleMapsPayload,
+      ).then((res) => {
+        setIsLoading(true);
+        if (res.status == 200) {
+          toast.success('Operation completed successfully');
+          navigate('/');
+        } else {
+          toast.error(res.data.message);
+        }
+      });
+    } catch (error) {
+      setIsLoading(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <>
       {isLoading == true ? (
@@ -271,8 +359,8 @@ export const GeneralSettings = () => {
             <Breadcrumb pageName="General Settings" />
             {/* Introduction Video Form */}
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-              <div className="  border-stroke py-4 px-4 sm:px-7 dark:border-strokedark">
-                <h3 className="text-lg font-medium text-black dark:text-white">
+              <div className="  border-stroke pt-4 px-4 sm:px-7 dark:border-strokedark">
+                <h3 className="text-lg font-extrabold text-black dark:text-white">
                   Introduction Video
                 </h3>
               </div>
@@ -388,7 +476,7 @@ export const GeneralSettings = () => {
             {/* Email Form */}
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
               <div className="  border-stroke py-4 px-4 sm:px-7 dark:border-strokedark">
-                <h3 className="text-lg font-medium text-black dark:text-white">
+                <h3 className="text-lg font-extrabold text-black dark:text-white">
                   Footer Email
                 </h3>
               </div>
@@ -458,7 +546,7 @@ export const GeneralSettings = () => {
             {/* Footer Phone Number Form */}
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
               <div className="  border-stroke py-4 px-4 sm:px-7 dark:border-strokedark">
-                <h3 className="text-lg font-medium text-black dark:text-white">
+                <h3 className="text-lg font-extrabold text-black dark:text-white">
                   Phone Number
                 </h3>
               </div>
@@ -508,6 +596,173 @@ export const GeneralSettings = () => {
                                   {errors.phone}
                                 </div>
                               )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          type="submit"
+                          className="w-full rounded bg-primary py-3 px-4 text-white hover:bg-primary-dark"
+                        >
+                          Save
+                        </button>
+                      </form>
+                    </>
+                  )}
+                </Formik>
+              </div>
+            </div>
+
+            {/* Footer Title Form */}
+            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+              <div className="  border-stroke py-4 px-4 sm:px-7 dark:border-strokedark">
+                <h3 className="text-lg font-extrabold text-black dark:text-white">
+                  Footer Title
+                </h3>
+              </div>
+              <div className="p-4 sm:p-7">
+                <Formik
+                  onSubmit={(values) => confirmUpdateFooterTitle(values)}
+                  enableReinitialize
+                  initialValues={{
+                    title: footerTitleResponse?.value,
+                  }}
+                  key={`FooterTitle`}
+                  validationSchema={FooterTitleValidationSchema}
+                >
+                  {({
+                    values,
+                    errors,
+                    touched,
+                    handleChange,
+                    handleBlur,
+                    handleSubmit,
+                    setFieldValue,
+                    setValues,
+                  }) => (
+                    <>
+                      <form onSubmit={handleSubmit}>
+                        <div className="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
+                          {/* Footer Title */}
+                          <div>
+                            <label className="mb-2 block text-sm font-medium text-black dark:text-white">
+                              Title
+                            </label>
+                            <div className="relative">
+                              <textarea
+                                className="w-full rounded border border-stroke bg-gray py-3 px-4 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
+                                name="title"
+                                id="title"
+                                onChange={(e) => {
+                                  handleChange(e);
+                                  setFieldValue('title', e.target.value); // Ensure Formik state updates
+                                }}
+                                onBlur={handleBlur}
+                                value={values.title}
+                              ></textarea>
+                              {touched.title && errors.title && (
+                                <div className="text-red-500 text-sm mt-1">
+                                  {errors.title}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          type="submit"
+                          className="w-full rounded bg-primary py-3 px-4 text-white hover:bg-primary-dark"
+                        >
+                          Save
+                        </button>
+                      </form>
+                    </>
+                  )}
+                </Formik>
+              </div>
+            </div>
+
+            {/* Footer Location  Form */}
+            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+              <div className="  border-stroke py-4 px-4 sm:px-7 dark:border-strokedark">
+                <h3 className="text-lg font-extrabold text-black dark:text-white">
+                  Location
+                </h3>
+              </div>
+              <div className="p-4 sm:p-7">
+                <Formik
+                  onSubmit={(values) => confirmUpdateLocation(values)}
+                  enableReinitialize
+                  initialValues={{
+                    location: locationResponse?.value,
+                    google_maps_location: googleMapsResponse?.value,
+                  }}
+                  key={`Location`}
+                  validationSchema={LocationValidationSchema}
+                >
+                  {({
+                    values,
+                    errors,
+                    touched,
+                    handleChange,
+                    handleBlur,
+                    handleSubmit,
+                    setFieldValue,
+                    setValues,
+                  }) => (
+                    <>
+                      <form onSubmit={handleSubmit}>
+                        <div className="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
+                          {/* Location */}
+                          <div>
+                            <label className="mb-2 block text-sm font-medium text-black dark:text-white">
+                              Location
+                            </label>
+                            <div className="relative">
+                              <textarea
+                                className="w-full rounded border border-stroke bg-gray py-3 px-4 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
+                                name="location"
+                                id="location"
+                                onChange={(e) => {
+                                  handleChange(e);
+                                  setFieldValue('location', e.target.value); // Ensure Formik state updates
+                                }}
+                                onBlur={handleBlur}
+                                value={values.location}
+                              ></textarea>
+                              {touched.location && errors.location && (
+                                <div className="text-red-500 text-sm mt-1">
+                                  {errors.location}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div>
+                            <label className="mb-2 block text-sm font-medium text-black dark:text-white">
+                              Google Maps Location
+                            </label>
+                            <div className="relative">
+                              <input
+                                className="w-full rounded border border-stroke bg-gray py-3 px-4 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
+                                type="text"
+                                name="google_maps_location"
+                                id="google_maps_location"
+                                onChange={(e) => {
+                                  handleChange(e);
+                                  setFieldValue(
+                                    'google_maps_location',
+                                    e.target.value,
+                                  ); // Ensure Formik state updates
+                                }}
+                                onBlur={handleBlur}
+                                value={values.google_maps_location}
+                              ></input>
+                              {touched.google_maps_location &&
+                                errors.google_maps_location && (
+                                  <div className="text-red-500 text-sm mt-1">
+                                    {errors.google_maps_location}
+                                  </div>
+                                )}
                             </div>
                           </div>
                         </div>

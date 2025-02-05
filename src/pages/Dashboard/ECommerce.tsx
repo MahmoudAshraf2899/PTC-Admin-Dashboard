@@ -30,6 +30,7 @@ const ECommerce: React.FC = () => {
         <CardDataStats
           title="Total Constructions Projects"
           total={`${apiResponse?.totalConstructions.toString()}`}
+          isLoading={isLoading}
         >
           <svg
             className="fill-primary dark:fill-white"
@@ -52,6 +53,7 @@ const ECommerce: React.FC = () => {
         <CardDataStats
           title="Total Development Projects"
           total={`${apiResponse?.totalDevelopments.toString()}`}
+          isLoading={isLoading}
         >
           <svg
             className="fill-primary dark:fill-white"
@@ -79,6 +81,7 @@ const ECommerce: React.FC = () => {
         <CardDataStats
           title="Total Users"
           total={`${apiResponse?.totalUsers.toString()}`}
+          isLoading={isLoading}
         >
           <svg
             className="fill-primary dark:fill-white"

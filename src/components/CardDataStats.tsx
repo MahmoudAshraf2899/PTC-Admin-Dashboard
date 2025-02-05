@@ -3,12 +3,14 @@ import React, { ReactNode } from 'react';
 interface CardDataStatsProps {
   title: string;
   total: string;
+  isLoading: boolean;
   children: ReactNode;
 }
 
 const CardDataStats: React.FC<CardDataStatsProps> = ({
   title,
   total,
+  isLoading,
   children,
 }) => {
   return (
@@ -20,7 +22,11 @@ const CardDataStats: React.FC<CardDataStatsProps> = ({
       <div className="mt-4 flex items-end justify-between">
         <div>
           <h4 className="text-title-md font-bold text-black dark:text-white">
-            {total}
+            {isLoading ? (
+              <div className="skeleton-pulse h-5 w-8 rounded-full bg-slate-200"></div>
+            ) : (
+              total
+            )}
           </h4>
           <span className="text-sm font-medium">{title}</span>
         </div>

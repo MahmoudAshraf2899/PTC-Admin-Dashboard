@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Loader from '../../common/Loader';
 import API from '../../Api/Api';
@@ -9,9 +9,11 @@ import * as Yup from 'yup';
 import { Formik, FormikHelpers } from 'formik';
 import { END_POINTS } from '../../constants/ApiConstant';
 import { BaseURL } from '../../constants/Bases.js';
-import SelectGroupOne from '../../components/Forms/SelectGroup/SelectGroupOne';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
-
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 interface ApiResponse {
   id: string;
   mainImage: string;
@@ -29,7 +31,11 @@ const validationSchema = Yup.object().shape({
 
 export const AboutUs = () => {
   const navigate = useNavigate();
-
+  const [editorData, setEditorData] = useState('');
+  const [value, setValue] = useState('');
+  const handleEditorChange = (event, editor) => {
+    setEditorData(editor.getData());
+  };
   const [isLoading, setIsLoading] = useState(false);
   const [apiResponse, setApiResponse] = useState<ApiResponse | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -181,6 +187,13 @@ export const AboutUs = () => {
     <>
       <Breadcrumb pageName="About Us Page" />
       {isLoading ? <Loader /> : null}
+      {/* <ReactQuill
+        theme="snow"
+        value={value}
+        onChange={setValue}
+        className="h-[300px]"
+      /> */}
+
       <div className="grid grid-cols-1 gap-9 sm:grid-cols-2">
         <div className="flex flex-col gap-9 col-span-full">
           {/* <!-- Contact Form --> */}

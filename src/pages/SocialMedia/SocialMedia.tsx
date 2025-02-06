@@ -203,7 +203,7 @@ const SocialMedia = () => {
                         : BaseURL.SmarterAspNetBase + item.iconPath
                     }
                     alt="Social Media Icon"
-                    className="h-16 w-16  bg-black-2 object-cover border rounded"
+                    className="h-16 w-16 bg-white object-cover border rounded"
                   />
 
                   {/* File Input */}

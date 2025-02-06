@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Loader from '../../common/Loader';
@@ -10,8 +9,6 @@ import { Formik, FormikHelpers } from 'formik';
 import { END_POINTS } from '../../constants/ApiConstant';
 import { BaseURL } from '../../constants/Bases.js';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
-import { CKEditor } from '@ckeditor/ckeditor5-react';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 interface ApiResponse {
@@ -32,7 +29,7 @@ const validationSchema = Yup.object().shape({
 export const AboutUs = () => {
   const navigate = useNavigate();
   const [editorData, setEditorData] = useState('');
-  const [value, setValue] = useState('');
+
   const handleEditorChange = (event, editor) => {
     setEditorData(editor.getData());
   };
@@ -46,17 +43,51 @@ export const AboutUs = () => {
 
   const [showOldMainImage, setShowOldMainImage] = useState<boolean>(true);
   const [mainFileMediaPath, setMainFileMediaPath] = useState('');
+  const customFonts = ['Arial', 'Courier', 'Times New Roman', 'Calistoga'];
+  const colors = ['red', 'blue', 'black', 'gray'];
 
   useEffect(() => {
     setIsLoading(true);
     API.get(`${END_POINTS.GET_ABOUT_US}/1`).then((res) => {
       if (res.status == 200) {
         setApiResponse(res.data.data);
-
+        setEditorData(res.data.data.description);
         setIsLoading(false);
       }
     });
   }, []);
+
+  const modules = {
+    toolbar: [
+      [{ font: [customFonts] }],
+      [{ size: [] }],
+      [{ color: [colors] }, { background: [] }], // Text and background color
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ align: [] }],
+      [{ list: 'ordered' }, { list: 'bullet' }],
+      ['blockquote', 'code-block'],
+      ['link', 'image'], // Adding image upload
+      ['clean'], // Remove formatting button
+    ],
+  };
+
+  // Define allowed formats
+  const formats = [
+    'font',
+    'size',
+    'color',
+    'background',
+    'bold',
+    'italic',
+    'underline',
+    'strike',
+    'align',
+    'list',
+    'blockquote',
+    'code-block',
+    'link',
+    'image',
+  ];
 
   const confirmUpdateAboutUs = async (values: any) => {
     setIsLoading(true);
@@ -187,12 +218,6 @@ export const AboutUs = () => {
     <>
       <Breadcrumb pageName="About Us Page" />
       {isLoading ? <Loader /> : null}
-      {/* <ReactQuill
-        theme="snow"
-        value={value}
-        onChange={setValue}
-        className="h-[300px]"
-      /> */}
 
       <div className="grid grid-cols-1 gap-9 sm:grid-cols-2">
         <div className="flex flex-col gap-9 col-span-full">
@@ -254,27 +279,22 @@ export const AboutUs = () => {
                       </div>
 
                       {/* Description */}
-                      <div className="mb-4.5 flex items-center flex-col gap-6 xl:flex-row">
+                      <div className="mb-4.5 flex  items-center flex-col gap-6 xl:flex-row">
                         <label className="mb-2.5 block text-black dark:text-white">
                           Description
                         </label>
-                        <textarea
-                          placeholder="Enter your sub title here"
-                          className="w-3/4 rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                          name="description"
-                          id="description"
-                          onChange={(e) => {
-                            handleChange(e);
-
-                            handleChangeAboutUs(
-                              e.target.value,
-                              'description',
-                              setValues,
-                            );
+                        <ReactQuill
+                          theme="snow"
+                          value={editorData}
+                          onChange={(value, delta, source, editor) => {
+                            setEditorData(value);
+                            setFieldValue('description', value);
                           }}
-                          onBlur={handleBlur}
-                          value={values.description}
+                          modules={modules}
+                          formats={formats}
+                          className="text-black-2"
                         />
+
                         {touched.description && errors.description && (
                           <div className="text-red-500 text-sm mt-1">
                             {errors.description}

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Loader from '../../common/Loader';
@@ -9,9 +8,9 @@ import * as Yup from 'yup';
 import { Formik, FormikHelpers } from 'formik';
 import { END_POINTS } from '../../constants/ApiConstant';
 import { BaseURL } from '../../constants/Bases.js';
-import SelectGroupOne from '../../components/Forms/SelectGroup/SelectGroupOne';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
-
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 interface ApiResponse {
   id: string;
   mainImage: string;
@@ -29,19 +28,21 @@ const validationSchema = Yup.object().shape({
 
 export const PrivacyPolicy = () => {
   const navigate = useNavigate();
+  const [editorData, setEditorData] = useState('');
 
   const [isLoading, setIsLoading] = useState(false);
   const [apiResponse, setApiResponse] = useState<ApiResponse | null>(null);
   const [file, setFile] = useState<File | null>(null);
-  const [subFile, setSubFile] = useState<File | null>(null);
   const [imageUploadWrapClass, setImageUploadWrapClass] =
     useState('image-upload-wrap');
   const [fileUploadContentVisible, setFileUploadContentVisible] =
     useState(false);
-  const [subFileUploadContentVisible, setSubFileUploadContentVisible] =
-    useState(false);
+
   const [showOldMainImage, setShowOldMainImage] = useState<boolean>(true);
   const [mainFileMediaPath, setMainFileMediaPath] = useState('');
+
+  const customFonts = ['Arial', 'Courier', 'Times New Roman', 'Calistoga'];
+  const colors = ['red', 'blue', 'black', 'gray'];
 
   useEffect(() => {
     setIsLoading(true);
@@ -49,12 +50,43 @@ export const PrivacyPolicy = () => {
     API.get(`${END_POINTS.GET_PRIVACY_POLICY}/1`).then((res) => {
       if (res.status == 200) {
         setApiResponse(res.data.data);
-
+        setEditorData(res.data.data.description);
         setIsLoading(false);
       }
     });
   }, []);
 
+  const modules = {
+    toolbar: [
+      [{ font: [customFonts] }],
+      [{ size: [] }],
+      [{ color: [colors] }, { background: [] }], // Text and background color
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ align: [] }],
+      [{ list: 'ordered' }, { list: 'bullet' }],
+      ['blockquote', 'code-block'],
+      ['link', 'image'], // Adding image upload
+      ['clean'], // Remove formatting button
+    ],
+  };
+
+  // Define allowed formats
+  const formats = [
+    'font',
+    'size',
+    'color',
+    'background',
+    'bold',
+    'italic',
+    'underline',
+    'strike',
+    'align',
+    'list',
+    'blockquote',
+    'code-block',
+    'link',
+    'image',
+  ];
   const confirmUpdatePrivacyPolicy = async (values: any) => {
     setIsLoading(true);
     let mainFilePath = '';
@@ -246,22 +278,16 @@ export const PrivacyPolicy = () => {
                         <label className="mb-2.5 block text-black dark:text-white">
                           Description
                         </label>
-                        <textarea
-                          placeholder="Enter your sub title here"
-                          className="w-3/4 rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                          name="description"
-                          id="description"
-                          onChange={(e) => {
-                            handleChange(e);
-
-                            handleChangePrivacyPolicy(
-                              e.target.value,
-                              'description',
-                              setValues,
-                            );
+                        <ReactQuill
+                          theme="snow"
+                          value={editorData}
+                          onChange={(value, delta, source, editor) => {
+                            setEditorData(value);
+                            setFieldValue('description', value);
                           }}
-                          onBlur={handleBlur}
-                          value={values.description}
+                          modules={modules}
+                          formats={formats}
+                          className="text-black-2"
                         />
                         {touched.description && errors.description && (
                           <div className="text-red-500 text-sm mt-1">

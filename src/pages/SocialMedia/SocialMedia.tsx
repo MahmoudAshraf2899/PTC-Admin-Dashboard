@@ -139,16 +139,22 @@ const SocialMedia = () => {
   const handleDelete = async (key) => {
     setIsLoading(true);
     try {
-      // const response = await axios.delete(
-      //   `${BaseURL.SmarterAspNetBase + END_POINTS.DELETE_SOCIAL_MEDIA_ICONS}`,
-      //    payload
-      // );
-      // if (response.status === 200) {
-      //   toast.success('Social media icon deleted successfully');
-      //   navigate('/');
-      // }
+      API.delete(
+        `${
+          BaseURL.SmarterAspNetBase + END_POINTS.DELETE_SOCIAL_MEDIA_ICONS
+        }?id=${key}`,
+      ).then((res) => {
+        if (res.status === 200) {
+          toast.success('Social media icon deleted successfully');
+          navigate('/');
+        } else {
+          toast.error('Something went wrong');
+        }
+      });
     } catch (error) {
-      toast.error('Error deleting icon');
+      toast.error('Something went wrong');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -210,8 +216,9 @@ const SocialMedia = () => {
                 </div>
                 <button
                   type="button"
+                  onClick={() => handleDelete(item.id)}
                   className="w-full rounded bg-red   py-3 px-4 mb-4 text-white hover:bg-red-dark"
-                  disabled={isSubmitting}
+                  // disabled={isSubmitting}
                 >
                   Delete
                 </button>

@@ -259,14 +259,14 @@ const AddProject: React.FC = () => {
                   <form onSubmit={handleSubmit}>
                     <div className="p-6.5">
                       {/* <!-- Project Name --> */}
-                      <div className="mb-4.5 flex items-center flex-col gap-6 xl:flex-row">
-                        <label className="mb-2.5 block text-black dark:text-white">
+                      <div className="mb-4.5 flex lg:items-center xs:items-start flex-col lg:gap-6 md:gap-4 sm:gap-4 xs:gap-2 gap-6 xl:flex-row">
+                        <label className="lg:mb-2.5 block text-black dark:text-white">
                           Name
                         </label>
                         <input
                           type="text"
                           placeholder="Enter project name here"
-                          className="w-3/4 rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          className="lg:w-3/4 md:w-full sm:w-full xs:w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                           name="title"
                           id="title"
                           onChange={(e) => {
@@ -285,14 +285,13 @@ const AddProject: React.FC = () => {
                       </div>
 
                       {/* description */}
-                      <div className="mb-4.5 flex items-center flex-col gap-6 xl:flex-row">
-                        <label className="mb-2.5 block text-black dark:text-white">
+                      <div className="mb-4.5 flex lg:items-center xs:items-start flex-col lg:gap-6 md:gap-4 sm:gap-4 xs:gap-2 gap-6 xl:flex-row">
+                        <label className="lg:mb-2.5 block text-black dark:text-white">
                           Description
                         </label>
-                        <input
-                          type="text"
+                        <textarea
                           placeholder="Enter project description here"
-                          className="w-3/4 rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          className="lg:w-3/4 md:w-full sm:w-full xs:w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                           name="description"
                           id="description"
                           onChange={(e) => {
@@ -311,14 +310,14 @@ const AddProject: React.FC = () => {
                       </div>
 
                       {/* Project Type */}
-                      <div className="mb-4.5 flex items-center flex-col gap-6 xl:flex-row">
-                        <label className="mb-2.5 block text-black dark:text-white">
+                      <div className="mb-4.5 flex lg:items-center xs:items-start flex-col lg:gap-6 md:gap-4 sm:gap-4 xs:gap-2 gap-6 xl:flex-row">
+                        <label className="lg:mb-2.5 block text-black dark:text-white">
                           Project Type
                           <br />
                         </label>
 
                         <select
-                          className="select max-w-47.5 sm:max-w-full text-slate-500  border-none bg-slate-200"
+                          className="select lg:max-w-47.5 xs:max-w-full sm:max-w-full text-slate-500  border-none bg-slate-200"
                           onChange={(e) => {
                             handleChange(e);
                             setFieldValue('projectTypeId', e.target.value);
@@ -341,8 +340,9 @@ const AddProject: React.FC = () => {
                           </div>
                         )}
                       </div>
+
                       {/* Main Page */}
-                      <div className="mt-5 mb-4.5 flex items-center flex-col gap-6 xl:flex-row">
+                      <div className="mt-5 mb-4.5 flex lg:items-center xs:items-start flex-col lg:gap-6 md:gap-4 sm:gap-4 xs:gap-2 gap-6 xl:flex-row">
                         <label className="flex cursor-pointer">
                           <div className="relative pt-0.5">
                             <input
@@ -389,6 +389,7 @@ const AddProject: React.FC = () => {
                       <div className="divider"></div>
 
                       <div className="mb-4 flex items-center gap-3">
+                        {' '}
                         <div className="h-14 w-14 rounded-full">
                           <a target="_blank">
                             <svg

@@ -186,7 +186,7 @@ const SocialMedia = () => {
                   </label>
                   <Field
                     name="targetLink"
-                    className="w-3/4 rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    className="lg:text-[16px] xs:text-[14px] lg:w-3/4 md:w-full sm:w-full xs:w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   />
                   <ErrorMessage
                     name="targetLink"
@@ -194,7 +194,7 @@ const SocialMedia = () => {
                     className="text-red-500"
                   />
                 </div>
-                <div className="mb-4 flex justify-start items-center gap-4">
+                <div className="mb-4 flex lg:flex-row sm:flex-col xs:flex-col justify-start items-center gap-4">
                   {/* Show Old Icon */}
                   <img
                     src={
@@ -265,7 +265,7 @@ const SocialMedia = () => {
                 </label>
                 <Field
                   name="targetLink"
-                  className="w-3/4 rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                  className="lg:text-[16px] xs:text-[14px] lg:w-3/4 md:w-full sm:w-full xs:w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                 />
                 <ErrorMessage
                   name="targetLink"
@@ -274,7 +274,9 @@ const SocialMedia = () => {
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-medium">Upload Icon</label>
+                <label className="block text-sm font-medium mb-2">
+                  Upload Icon
+                </label>
                 <input
                   type="file"
                   className="input-file input-file-primary"

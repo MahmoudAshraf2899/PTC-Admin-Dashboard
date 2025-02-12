@@ -14,7 +14,11 @@ module.exports = {
       '2xsm': '375px',
       xsm: '425px',
       '3xl': '2000px',
-      ...defaultTheme.screens,
+      xs: '300px',
+      sm: '480px',
+      md: '768px',
+      lg: '976px',
+      xl: '1440px',
     },
     extend: {
       colors: {

@@ -372,7 +372,6 @@ export const GeneralSettings = () => {
                     value: apiResponse?.value,
                   }}
                   key={`IntroductionVideo`}
-                  //   validationSchema={validationSchema}
                 >
                   {({
                     values,
@@ -456,7 +455,7 @@ export const GeneralSettings = () => {
                                 or drag and drop
                               </p>
                               <p className="mt-1.5">MP4</p>
-                              <p>(max, 800 X 800px)</p>
+                              <p>(Max, 40MB)</p>
                             </div>
                           </div>
                         </div>

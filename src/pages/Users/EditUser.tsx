@@ -197,14 +197,14 @@ export const EditUser = () => {
                   <form onSubmit={handleSubmit}>
                     <div className="p-6.5">
                       {/* <!-- First Name --> */}
-                      <div className="mb-4.5 flex items-center flex-col gap-6 xl:flex-row">
-                        <label className="mb-2.5 block text-black dark:text-white">
+                      <div className="mb-4.5 flex lg:items-center xs:items-start flex-col lg:gap-6 md:gap-4 sm:gap-4 xs:gap-2 gap-6 xl:flex-row">
+                        <label className="lg:mb-2.5 block text-black dark:text-white">
                           First Name
                         </label>
                         <input
                           type="text"
                           placeholder="Enter first name here"
-                          className="w-3/4 rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          className="lg:w-3/4 md:w-full sm:w-full xs:w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                           name="firstName"
                           id="firstName"
                           onChange={(e) => {
@@ -227,14 +227,14 @@ export const EditUser = () => {
                       </div>
 
                       {/* Last Name */}
-                      <div className="mb-4.5 flex items-center flex-col gap-6 xl:flex-row">
-                        <label className="mb-2.5 block text-black dark:text-white">
+                      <div className="mb-4.5 flex lg:items-center xs:items-start flex-col lg:gap-6 md:gap-4 sm:gap-4 xs:gap-2 gap-6 xl:flex-row">
+                        <label className="lg:mb-2.5 block text-black dark:text-white">
                           Last Name
                         </label>
                         <input
                           type="text"
                           placeholder="Enter last name here"
-                          className="w-3/4 rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          className="lg:w-3/4 md:w-full sm:w-full xs:w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                           name="lastName"
                           id="lastName"
                           onChange={(e) => {
@@ -257,14 +257,14 @@ export const EditUser = () => {
                       </div>
 
                       {/* Email */}
-                      <div className="mb-4.5 flex items-center flex-col gap-6 xl:flex-row">
-                        <label className="mb-2.5 block text-black dark:text-white">
+                      <div className="mb-4.5 flex lg:items-center xs:items-start flex-col lg:gap-6 md:gap-4 sm:gap-4 xs:gap-2 gap-6 xl:flex-row">
+                        <label className="lg:mb-2.5 block text-black dark:text-white">
                           Email
                         </label>
                         <input
                           type="text"
                           placeholder="Enter email here"
-                          className="w-3/4 rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          className="lg:w-3/4 md:w-full sm:w-full xs:w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                           name="email"
                           id="email"
                           onChange={(e) => {
@@ -287,14 +287,14 @@ export const EditUser = () => {
                       </div>
 
                       {/* phone Number */}
-                      <div className="mb-4.5 flex items-center flex-col gap-6 xl:flex-row">
-                        <label className="mb-2.5 block text-black dark:text-white">
+                      <div className="mb-4.5 flex lg:items-center xs:items-start flex-col lg:gap-6 md:gap-4 sm:gap-4 xs:gap-2 gap-6 xl:flex-row">
+                        <label className="lg:mb-2.5 block text-black dark:text-white">
                           Phone Number
                         </label>
                         <input
                           type="text"
                           placeholder="Enter phone number here"
-                          className="w-3/4 rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          className="lg:w-3/4 md:w-full sm:w-full xs:w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                           name="phoneNumber"
                           id="phoneNumber"
                           onChange={(e) => {
@@ -317,14 +317,14 @@ export const EditUser = () => {
                       </div>
 
                       {/* User Name */}
-                      <div className="mb-4.5 flex items-center flex-col gap-6 xl:flex-row">
-                        <label className="mb-2.5 block text-black dark:text-white">
+                      <div className="mb-4.5 flex lg:items-center xs:items-start flex-col lg:gap-6 md:gap-4 sm:gap-4 xs:gap-2 gap-6 xl:flex-row">
+                        <label className="lg:mb-2.5 block text-black dark:text-white">
                           UserName
                         </label>
                         <input
                           type="text"
                           disabled
-                          className="w-3/4 rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          className="lg:w-3/4 md:w-full sm:w-full xs:w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                           onBlur={handleBlur}
                           value={values.userName}
                         />

@@ -249,14 +249,14 @@ export const AboutUs = () => {
                   <form onSubmit={handleSubmit}>
                     <div className="p-6.5">
                       {/* <!--   Title --> */}
-                      <div className="mb-4.5 flex items-center flex-col gap-6 xl:flex-row">
-                        <label className="mb-2.5 block text-black dark:text-white">
+                      <div className="mb-4.5 flex lg:items-center xs:items-start flex-col lg:gap-6 md:gap-4 sm:gap-4 xs:gap-2 gap-6 xl:flex-row">
+                        <label className="lg:mb-2.5 block text-black dark:text-white">
                           Title
                         </label>
                         <input
                           type="text"
                           placeholder="Enter your  title here"
-                          className="w-3/4 rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          className="lg:w-3/4 md:w-full sm:w-full xs:w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                           name="title"
                           id="title"
                           onChange={(e) => {
@@ -279,8 +279,8 @@ export const AboutUs = () => {
                       </div>
 
                       {/* Description */}
-                      <div className="mb-4.5 flex  items-center flex-col gap-6 xl:flex-row">
-                        <label className="mb-2.5 block text-black dark:text-white">
+                      <div className="mb-4.5 flex  lg:items-center xs:items-start flex-col lg:gap-6 md:gap-4 sm:gap-4 xs:gap-2 gap-6 xl:flex-row">
+                        <label className="lg:mb-2.5 block text-black dark:text-white">
                           Description
                         </label>
                         <ReactQuill
@@ -292,7 +292,7 @@ export const AboutUs = () => {
                           }}
                           modules={modules}
                           formats={formats}
-                          className="text-black-2"
+                          className="text-black-2 lg:w-3/4 md:w-full sm:w-full xs:w-full"
                         />
 
                         {touched.description && errors.description && (
@@ -301,6 +301,8 @@ export const AboutUs = () => {
                           </div>
                         )}
                       </div>
+
+                      <div className="divider"></div>
 
                       {/* Old Main Image Preview */}
                       <div className="mb-4 flex items-center gap-3">
@@ -378,7 +380,7 @@ export const AboutUs = () => {
                               <div className="file-upload-content">
                                 <img
                                   id="oldMainImage"
-                                  className="file-upload-image"
+                                  className="lg:max-h-[350px] lg:max-w-[1000px] lg:m-auto"
                                   src={
                                     BaseURL.SmarterAspNetBase + values.mainImage
                                   }
@@ -449,7 +451,7 @@ export const AboutUs = () => {
                               <div className="mb-3">
                                 <div className="file-upload-content">
                                   <img
-                                    className="file-upload-image"
+                                    className="lg:max-h-[350px] lg:max-w-[1000px] lg:m-auto"
                                     src={URL.createObjectURL(file)}
                                     alt="your"
                                   />

@@ -182,201 +182,207 @@ const GuaranteeSection = () => {
   }
 
   return (
-    <Formik
-      initialValues={initialValues}
-      validationSchema={validationSchema}
-      enableReinitialize // Ensures the form updates when initialValues change
-      onSubmit={handleSubmit}
-    >
-      {({ values, setFieldValue }) => (
-        <Form className="p-8 bg-gray-100 min-h-screen">
-          <h1 className="text-3xl font-bold mb-6 text-gray-800">
-            Guarantee Section
-          </h1>
+    <>
+      <Breadcrumb pageName="Guarantee Section" />
+      {isLoading ? <Loader /> : null}
+      <Formik
+        initialValues={initialValues}
+        validationSchema={validationSchema}
+        enableReinitialize // Ensures the form updates when initialValues change
+        onSubmit={handleSubmit}
+      >
+        {({ values, setFieldValue }) => (
+          <Form className="p-8 bg-gray-100 min-h-screen">
+            <h1 className="text-3xl font-bold mb-6 text-gray-800">
+              Main Section
+            </h1>
 
-          {/* Main Section */}
-          <div className="bg-white p-6 shadow-md rounded-lg mb-8">
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">
-                Title
-              </label>
-              <Field
-                name="title"
-                type="text"
-                className="w-3/4 rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                placeholder="Enter title"
-              />
-              <ErrorMessage
-                name="title"
-                component="div"
-                className="text-sm text-red-500"
-              />
-            </div>
-            <div className="mt-5 mb-4.5 flex items-center flex-col gap-2 xl:flex-row">
-              <p>Is Active</p>
-              <label className="block text-sm font-medium text-gray-700">
+            {/* Main Section */}
+            <div className="bg-white p-6 shadow-md rounded-lg mb-8">
+              <div className="mb-4">
+                <label className="mb-2 block text-sm font-medium text-gray-700">
+                  Title
+                </label>
                 <Field
-                  name="isActive"
-                  type="checkbox"
-                  className="taskCheckbox sr-only"
+                  name="title"
+                  type="text"
+                  className="lg:w-3/4 md:w-full sm:w-full xs:w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                  placeholder="Enter title"
                 />
-                <div className="box mr-3 flex h-5 w-5 items-center justify-center rounded border border-stroke dark:border-strokedark">
-                  <span className="text-white opacity-0">
-                    <svg
-                      className="fill-current"
-                      width="10"
-                      height="7"
-                      viewBox="0 0 10 7"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        clipRule="evenodd"
-                        d="M9.70685 0.292804C9.89455 0.480344 10 0.734667 10 0.999847C10 1.26503 9.89455 1.51935 9.70685 1.70689L4.70059 6.7072C4.51283 6.89468 4.2582 7 3.9927 7C3.72721 7 3.47258 6.89468 3.28482 6.7072L0.281063 3.70701C0.0986771 3.5184 -0.00224342 3.26578 3.785e-05 3.00357C0.00231912 2.74136 0.10762 2.49053 0.29326 2.30511C0.4789 2.11969 0.730026 2.01451 0.992551 2.01224C1.25508 2.00996 1.50799 2.11076 1.69683 2.29293L3.9927 4.58607L8.29108 0.292804C8.47884 0.105322 8.73347 0 8.99896 0C9.26446 0 9.51908 0.105322 9.70685 0.292804Z"
-                        fill=""
-                      />
-                    </svg>
-                  </span>
-                </div>
-
                 <ErrorMessage
-                  name="isActive"
+                  name="title"
                   component="div"
                   className="text-sm text-red-500"
                 />
-              </label>
-            </div>
-          </div>
-
-          {/* Child Sections */}
-          <h2 className="text-2xl font-semibold mb-4 text-gray-800">
-            Child Sections
-          </h2>
-          {values.children.map((child, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-lg shadow-md mb-4 border border-gray-200 overflow-hidden"
-            >
-              <div className="p-4">
-                {/* Title Field */}
-                <div className="mb-4">
-                  <label className="block mb-4 text-sm font-medium text-gray-700">
-                    Title
-                  </label>
+              </div>
+              <div className="mt-5 mb-4.5 flex lg:items-center xs:items-start flex-col md:flex-row sm:flex-row xs:flex-row lg:gap-6 md:gap-4 sm:gap-4 xs:gap-2 gap-2 xl:flex-row">
+                <p>Is Active</p>
+                <label className="block text-sm font-medium text-gray-700">
                   <Field
-                    name={`children[${index}].title`}
-                    type="text"
-                    className="w-3/4 rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                    placeholder="Enter title"
+                    name="isActive"
+                    type="checkbox"
+                    className="taskCheckbox sr-only"
                   />
-                  <ErrorMessage
-                    name={`children[${index}].title`}
-                    component="div"
-                    className="text-sm text-red-500"
-                  />
-                </div>
-
-                {/* Icon Upload */}
-                <div>
-                  <label className="mb-4 block text-sm font-medium text-gray-700">
-                    Icon
-                  </label>
-
-                  <div className="flex items-center gap-3">
-                    {/* Show Preview if Icon Exists */}
-                    {child.icon ? (
-                      <div className="flex items-center gap-4 ">
-                        <img
-                          src={
-                            child.icon.startsWith('\\') ||
-                            child.icon.startsWith('//') // Check if it's a relative URL (from your server)
-                              ? BaseURL.SmarterAspNetBase + child.icon // Prepend base URL for server icons
-                              : child.icon // If it's a local file URL, use the direct URL
-                          }
-                          alt="Icon Preview"
-                          className="h-20 w-20 object-cover rounded bg-black-2"
+                  <div className="box mr-3 flex h-5 w-5 items-center justify-center rounded border border-stroke dark:border-strokedark">
+                    <span className="text-white opacity-0">
+                      <svg
+                        className="fill-current"
+                        width="10"
+                        height="7"
+                        viewBox="0 0 10 7"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          clipRule="evenodd"
+                          d="M9.70685 0.292804C9.89455 0.480344 10 0.734667 10 0.999847C10 1.26503 9.89455 1.51935 9.70685 1.70689L4.70059 6.7072C4.51283 6.89468 4.2582 7 3.9927 7C3.72721 7 3.47258 6.89468 3.28482 6.7072L0.281063 3.70701C0.0986771 3.5184 -0.00224342 3.26578 3.785e-05 3.00357C0.00231912 2.74136 0.10762 2.49053 0.29326 2.30511C0.4789 2.11969 0.730026 2.01451 0.992551 2.01224C1.25508 2.00996 1.50799 2.11076 1.69683 2.29293L3.9927 4.58607L8.29108 0.292804C8.47884 0.105322 8.73347 0 8.99896 0C9.26446 0 9.51908 0.105322 9.70685 0.292804Z"
+                          fill=""
                         />
-                        <button
-                          type="button"
-                          className="text-red-500 hover:text-red-700"
-                          onClick={() =>
-                            handleDeleteIcon(index, values, setFieldValue)
-                          }
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                          >
-                            <path
-                              d="M5 8V18C5 20.2091 6.79086 22 9 22H15C17.2091 22 19 20.2091 19 18V8M14 11V17M10 11L10 17M16 5L14.5937 2.8906C14.2228 2.3342 13.5983 2 12.9296 2H11.0704C10.4017 2 9.7772 2.3342 9.40627 2.8906L8 5M16 5H8M16 5H21M8 5H3"
-                              stroke="#EB001B"
-                              stroke-width="1.5"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="relative block w-full cursor-pointer appearance-none rounded border border-dashed border-primary bg-gray py-4 px-4 dark:bg-meta-4 sm:py-7.5">
-                        <input
-                          className="absolute inset-0 z-50 m-0 h-full w-full cursor-pointer p-0 opacity-0 outline-none"
-                          type="file"
-                          onChange={(e) =>
-                            readURL(e.target, index, values, setFieldValue)
-                          }
-                          accept="image/*"
-                        />
-                        <div className="flex flex-col items-center justify-center space-y-3">
-                          <span className="text-primary">Click to upload</span>
-                          <p>SVG, PNG, JPG, or GIF (max: 800x800px)</p>
-                        </div>
-                      </div>
-                    )}
+                      </svg>
+                    </span>
                   </div>
+
                   <ErrorMessage
-                    name={`children[${index}].icon`}
+                    name="isActive"
                     component="div"
                     className="text-sm text-red-500"
                   />
-                </div>
-              </div>
-              <div className="p-4">
-                <button
-                  type="button"
-                  className="text-red-500 font-bold hover:text-red-700"
-                  onClick={() =>
-                    handleRemoveSection(index, values, setFieldValue)
-                  }
-                >
-                  Remove Section
-                </button>
+                </label>
               </div>
             </div>
-          ))}
 
-          <button
-            type="button"
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600"
-            onClick={() => handleAddSection(values, setFieldValue)}
-          >
-            Add Child Section
-          </button>
+            {/* Children Section */}
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800">
+              Children Section
+            </h2>
+            {values.children.map((child, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-lg shadow-md mb-4 border border-gray-200 overflow-hidden"
+              >
+                <div className="p-4">
+                  {/* Title Field */}
+                  <div className="mb-4">
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Title
+                    </label>
+                    <Field
+                      name={`children[${index}].title`}
+                      type="text"
+                      className="lg:w-3/4 md:w-full sm:w-full xs:w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      placeholder="Enter title"
+                    />
+                    <ErrorMessage
+                      name={`children[${index}].title`}
+                      component="div"
+                      className="text-sm text-red-500"
+                    />
+                  </div>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="mt-4 ml-4 px-4 py-2 bg-green-500 text-white rounded-md shadow hover:bg-green-600"
-          >
-            Submit
-          </button>
-        </Form>
-      )}
-    </Formik>
+                  {/* Icon Upload */}
+                  <div>
+                    <label className="mb-4 block text-sm font-medium text-gray-700">
+                      Icon
+                    </label>
+
+                    <div className="flex items-center gap-3">
+                      {/* Show Preview if Icon Exists */}
+                      {child.icon ? (
+                        <div className="flex items-center gap-4 ">
+                          <img
+                            src={
+                              child.icon.startsWith('\\') ||
+                              child.icon.startsWith('//') // Check if it's a relative URL (from your server)
+                                ? BaseURL.SmarterAspNetBase + child.icon // Prepend base URL for server icons
+                                : child.icon // If it's a local file URL, use the direct URL
+                            }
+                            alt="Icon Preview"
+                            className="h-20 w-20 object-cover rounded bg-black-2"
+                          />
+                          <button
+                            type="button"
+                            className="text-red-500 hover:text-red-700"
+                            onClick={() =>
+                              handleDeleteIcon(index, values, setFieldValue)
+                            }
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                            >
+                              <path
+                                d="M5 8V18C5 20.2091 6.79086 22 9 22H15C17.2091 22 19 20.2091 19 18V8M14 11V17M10 11L10 17M16 5L14.5937 2.8906C14.2228 2.3342 13.5983 2 12.9296 2H11.0704C10.4017 2 9.7772 2.3342 9.40627 2.8906L8 5M16 5H8M16 5H21M8 5H3"
+                                stroke="#EB001B"
+                                stroke-width="1.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="relative block w-full cursor-pointer appearance-none rounded border border-dashed border-primary bg-gray py-4 px-4 dark:bg-meta-4 sm:py-7.5">
+                          <input
+                            className="absolute inset-0 z-50 m-0 h-full w-full cursor-pointer p-0 opacity-0 outline-none"
+                            type="file"
+                            onChange={(e) =>
+                              readURL(e.target, index, values, setFieldValue)
+                            }
+                            accept="image/*"
+                          />
+                          <div className="flex flex-col items-center justify-center space-y-3">
+                            <span className="text-primary">
+                              Click to upload
+                            </span>
+                            <p>SVG, PNG, JPG, or GIF (max: 800x800px)</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <ErrorMessage
+                      name={`children[${index}].icon`}
+                      component="div"
+                      className="text-sm text-red-500"
+                    />
+                  </div>
+                </div>
+                <div className="p-4">
+                  <button
+                    type="button"
+                    className="text-red-500 font-bold hover:text-red-700"
+                    onClick={() =>
+                      handleRemoveSection(index, values, setFieldValue)
+                    }
+                  >
+                    Remove Section
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            <button
+              type="button"
+              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600"
+              onClick={() => handleAddSection(values, setFieldValue)}
+            >
+              Add Child Section
+            </button>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className="mt-4 ml-4 px-4 py-2 bg-green-500 text-white rounded-md shadow hover:bg-green-600"
+            >
+              Submit
+            </button>
+          </Form>
+        )}
+      </Formik>
+    </>
   );
 };
 

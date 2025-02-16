@@ -31,14 +31,17 @@ interface ApiResponse {
   mainImageUrl: string;
   mainImageUID: string;
   projectTypeId: number;
+  order: number;
   mainPage: boolean;
   media: Media[];
 }
 
 const validationSchema = Yup.object().shape({
-  farmArea: Yup.string()
-    .matches(/^(?![1-9]$)\d+$/, 'من فضلك قم بإدخال رقم اكبر من 9')
-    .required('من فضلك قم بإدخال مساحة العنبر'),
+  order: Yup.number()
+    .typeError('Must be a number')
+    .min(0, 'Must be a non-negative number')
+    .max(1000, 'Must be less than 1000')
+    .required('Order Field is required'),
 });
 
 export const EditProject = () => {
@@ -109,32 +112,32 @@ export const EditProject = () => {
       // First: Upload all media files
       for (let i = 0; i < files.length; i++) {
         const formData = new FormData();
-        if (files[i].UID.length == 0) {
-          formData.append('file', files[i].file);
+        // if (files[i].UID.length == 0) {
+        formData.append('file', files[i].file);
 
-          const data = {
-            File: files[i].file,
-            MediaType: files[i].file.type === 'image/png' ? 1 : 2,
-            Directory: 8,
-          };
+        const data = {
+          File: files[i].file,
+          MediaType: files[i].file.type === 'image/png' ? 1 : 2,
+          Directory: 8,
+        };
 
-          const mediaResponse = await axios.post(
-            `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`,
-            data,
-            {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`,
-                'Content-Type': 'multipart/form-data',
-              },
+        const mediaResponse = await axios.post(
+          `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`,
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              'Content-Type': 'multipart/form-data',
             },
-          );
+          },
+        );
 
-          if (mediaResponse.status === 200) {
-            mediaUIDs.push(mediaResponse.data.id);
-          }
-        } else {
-          mediaUIDs.push(files[i].UID);
+        if (mediaResponse.status === 200) {
+          mediaUIDs.push(mediaResponse.data.id);
         }
+        // } else {
+        //   mediaUIDs.push(files[i].UID);
+        // }
       }
 
       // Second: Upload the main image if changed
@@ -169,29 +172,30 @@ export const EditProject = () => {
         id: apiResponse?.id,
         title: apiResponse?.title,
         description: apiResponse?.description,
-
+        order: apiResponse?.order,
         projectTypeId: projectTypeId,
         mainImage: ImageUrl.length == 0 ? apiResponse?.mainImageUrl : ImageUrl,
         mainPage: apiResponse?.mainPage,
         media: mediaUIDs.map((uid) => ({ uid })),
       };
-      const projectResponse = await axios.put(
-        `${BaseURL.SmarterAspNetBase}${END_POINTS.UPDATE_PROJECT}`,
-        data,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json',
-          },
-        },
-      );
+      console.log('🚀 ~ confirmEditProject ~ data:', data);
+      // const projectResponse = await axios.put(
+      //   `${BaseURL.SmarterAspNetBase}${END_POINTS.UPDATE_PROJECT}`,
+      //   data,
+      //   {
+      //     headers: {
+      //       Authorization: `Bearer ${localStorage.getItem('token')}`,
+      //       'Content-Type': 'application/json',
+      //     },
+      //   },
+      // );
 
-      if (projectResponse.status === 200) {
-        toast.success('Operation completed successfully');
-        navigate('/projects');
-      } else {
-        toast.error('Something went wrong ..!');
-      }
+      // if (projectResponse.status === 200) {
+      //   toast.success('Operation completed successfully');
+      //   navigate('/projects');
+      // } else {
+      //   toast.error('Something went wrong ..!');
+      // }
     } catch (error) {
       console.error(error);
       toast.error('An error occurred while processing your request.');
@@ -314,8 +318,9 @@ export const EditProject = () => {
                 mainPage: apiResponse?.mainPage,
                 projectTypeId: apiResponse?.projectTypeId,
                 mainImageUrl: apiResponse?.mainImageUrl,
+                order: apiResponse?.order,
               }}
-              // validationSchema={validationSchema}
+              validationSchema={validationSchema}
               key={`UpdateProject`}
               // validationSchema={validationSchema}
             >
@@ -396,6 +401,35 @@ export const EditProject = () => {
                           <option value="1">Constructions</option>
                           <option value="2">Developments</option>
                         </select>
+                      </div>
+                      {/* Project  Order*/}
+                      <div className="mb-4.5 flex lg:items-center xs:items-start flex-col lg:gap-6 md:gap-4 sm:gap-4 xs:gap-2 gap-6 xl:flex-row">
+                        <label className="lg:mb-2.5 block text-black dark:text-white">
+                          Order
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Enter project view order"
+                          className="lg:w-3/4 md:w-full sm:w-full xs:w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          name="order"
+                          id="order"
+                          onChange={(e) => {
+                            handleChange(e);
+
+                            handleChangeValues(
+                              e.target.value,
+                              'order',
+                              setValues,
+                            );
+                          }}
+                          onBlur={handleBlur}
+                          value={values.order}
+                        />
+                        {touched.order && errors.order && (
+                          <div className="text-red-500 text-sm mt-1">
+                            {errors.order}
+                          </div>
+                        )}
                       </div>
 
                       {/* Main Page */}

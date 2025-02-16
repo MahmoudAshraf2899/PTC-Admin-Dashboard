@@ -112,32 +112,32 @@ export const EditProject = () => {
       // First: Upload all media files
       for (let i = 0; i < files.length; i++) {
         const formData = new FormData();
-        // if (files[i].UID.length == 0) {
-        formData.append('file', files[i].file);
+        if (files[i].UID.length == 0) {
+          formData.append('file', files[i].file);
 
-        const data = {
-          File: files[i].file,
-          MediaType: files[i].file.type === 'image/png' ? 1 : 2,
-          Directory: 8,
-        };
+          const data = {
+            File: files[i].file,
+            MediaType: files[i].file.type === 'image/png' ? 1 : 2,
+            Directory: 8,
+          };
 
-        const mediaResponse = await axios.post(
-          `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`,
-          data,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
-              'Content-Type': 'multipart/form-data',
+          const mediaResponse = await axios.post(
+            `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`,
+            data,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'multipart/form-data',
+              },
             },
-          },
-        );
+          );
 
-        if (mediaResponse.status === 200) {
-          mediaUIDs.push(mediaResponse.data.id);
+          if (mediaResponse.status === 200) {
+            mediaUIDs.push(mediaResponse.data.id);
+          }
+        } else {
+          mediaUIDs.push(files[i].UID);
         }
-        // } else {
-        //   mediaUIDs.push(files[i].UID);
-        // }
       }
 
       // Second: Upload the main image if changed
@@ -178,6 +178,7 @@ export const EditProject = () => {
         mainPage: apiResponse?.mainPage,
         media: mediaUIDs.map((uid) => ({ uid })),
       };
+      // console.log('🚀 ~ confirmEditProject ~ data:', data);
       const projectResponse = await axios.put(
         `${BaseURL.SmarterAspNetBase}${END_POINTS.UPDATE_PROJECT}`,
         data,

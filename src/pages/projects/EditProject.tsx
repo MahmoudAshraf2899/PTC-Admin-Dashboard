@@ -178,24 +178,23 @@ export const EditProject = () => {
         mainPage: apiResponse?.mainPage,
         media: mediaUIDs.map((uid) => ({ uid })),
       };
-      console.log('🚀 ~ confirmEditProject ~ data:', data);
-      // const projectResponse = await axios.put(
-      //   `${BaseURL.SmarterAspNetBase}${END_POINTS.UPDATE_PROJECT}`,
-      //   data,
-      //   {
-      //     headers: {
-      //       Authorization: `Bearer ${localStorage.getItem('token')}`,
-      //       'Content-Type': 'application/json',
-      //     },
-      //   },
-      // );
+      const projectResponse = await axios.put(
+        `${BaseURL.SmarterAspNetBase}${END_POINTS.UPDATE_PROJECT}`,
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
 
-      // if (projectResponse.status === 200) {
-      //   toast.success('Operation completed successfully');
-      //   navigate('/projects');
-      // } else {
-      //   toast.error('Something went wrong ..!');
-      // }
+      if (projectResponse.status === 200) {
+        toast.success('Operation completed successfully');
+        navigate('/projects');
+      } else {
+        toast.error('Something went wrong ..!');
+      }
     } catch (error) {
       console.error(error);
       toast.error('An error occurred while processing your request.');

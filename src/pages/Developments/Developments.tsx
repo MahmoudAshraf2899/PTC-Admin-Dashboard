@@ -67,7 +67,7 @@ export const Developments = () => {
         const data = {
           File: file,
           MediaType: 1,
-          Directory: 3,
+          Directory: 4,
         };
         const mediaResponse = await axios.post(
           `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`,

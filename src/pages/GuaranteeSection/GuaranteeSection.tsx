@@ -9,6 +9,7 @@ import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import { max } from 'moment';
 
 interface FilePreview {
   file: File;
@@ -26,11 +27,17 @@ const GuaranteeSection = () => {
   const navigate = useNavigate();
 
   const validationSchema = Yup.object({
-    title: Yup.string().required('Title is required'),
+    title: Yup.string()
+      .required('Title is required')
+      .min(20, 'Title must be at least 20 characters')
+      .max(65, 'Title must be at most 65 characters'),
 
     children: Yup.array().of(
       Yup.object({
-        title: Yup.string().required('Child title is required'),
+        title: Yup.string()
+          .required('Child title is required')
+          .min(30, 'Child title must be at least 30 characters')
+          .max(100, 'Child title must be at most 100 characters'),
         icon: Yup.string().required('Child icon is required'),
       }),
     ),

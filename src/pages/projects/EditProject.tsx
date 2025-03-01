@@ -22,6 +22,7 @@ interface Media {
   mediaId: number;
   mediaUrl: string;
   mediaUID: string;
+  mediaType: string;
 }
 
 interface ApiResponse {
@@ -81,7 +82,7 @@ export const EditProject = () => {
         // Map media to FilePreview format
         const mediaFiles: FilePreview[] = response.media.map((media) => {
           const file = new File([], media.mediaUID, {
-            type: 'image',
+            type: media.mediaType == '2' ? 'video' : 'image',
           }); // File object with no content
           let preview = media.mediaUrl.startsWith('\\')
             ? media.mediaUrl.replace('\\', '/')
@@ -117,7 +118,7 @@ export const EditProject = () => {
 
           const data = {
             File: files[i].file,
-            MediaType: files[i].file.type === 'image/png' ? 1 : 2,
+            MediaType: files[i].file.type.includes('image') ? 1 : 2,
             Directory: 8,
           };
 
@@ -269,22 +270,6 @@ export const EditProject = () => {
         setMainFile(input.files[0]);
 
         setFile(input.files[0]);
-      };
-
-      reader.readAsDataURL(input.files[0]);
-    } else {
-      removeUpload();
-    }
-  };
-
-  const readMainImageURL = (input: any) => {
-    if (input.files && input.files[0]) {
-      const reader = new FileReader();
-
-      reader.onload = (e) => {
-        setImageUploadWrapClass('image-upload-wrap image-dropping');
-        setMainImageFileUploadContentVisible(true);
-        setMainFile(input.files[0]);
       };
 
       reader.readAsDataURL(input.files[0]);

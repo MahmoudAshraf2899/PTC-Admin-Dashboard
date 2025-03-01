@@ -150,7 +150,7 @@ const AddProject: React.FC = () => {
         formData.append('file', files[i].file);
         const data = {
           File: files[i].file,
-          MediaType: files[i].file.type === 'image/png' ? 1 : 2,
+          MediaType: files[i].file.type.includes('image') ? 1 : 2,
           Directory: 8,
         };
 

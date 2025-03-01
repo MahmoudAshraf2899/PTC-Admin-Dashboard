@@ -33,6 +33,7 @@ import AddUser from './pages/Users/AddUser';
 import { EditUser } from './pages/Users/EditUser';
 import { GeneralSettings } from './pages/GeneralSettings/GeneralSettings';
 import SocialMedia from './pages/SocialMedia/SocialMedia';
+import { ContactUs } from './pages/ContactUs/ContactUs';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -142,6 +143,15 @@ function App() {
               <>
                 <PageTitle title="Privacy Policy  | PTC - Admin Dashboard" />
                 <PrivacyPolicy />
+              </>
+            }
+          />
+          <Route
+            path="/ContactUs"
+            element={
+              <>
+                <PageTitle title="Contact Us  | PTC - Admin Dashboard" />
+                <ContactUs />
               </>
             }
           />

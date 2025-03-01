@@ -56,7 +56,10 @@ export const GeneralSettings = () => {
   const [introductionVideoResponse, setIntroductionVideoResponse] =
     useState<ApiResponse>();
 
-  const [emailResponse, setEmailResponse] = useState<ApiResponse | null>(null);
+  const [footerEmailResponse, setFooterEmailResponse] =
+    useState<ApiResponse | null>(null);
+  const [emailsRecieverResponse, setEmailsReciversResponse] =
+    useState<ApiResponse | null>(null);
   const [phoneNumberResponse, setPhoneNumberResponse] =
     useState<ApiResponse | null>(null);
   const [footerTitleResponse, setFooterTitleResponse] =
@@ -83,8 +86,9 @@ export const GeneralSettings = () => {
     fetchData(END_POINTS.PHONE_NUMBER, setPhoneNumberResponse);
     fetchData(END_POINTS.LOCATION, setLocationResponse);
     fetchData(END_POINTS.GOOGLE_MAPS_LOCATION, setGoogleMapsResponse);
-    fetchData(END_POINTS.FOOTER_EMAIL, setEmailResponse);
+    fetchData(END_POINTS.FOOTER_EMAIL, setFooterEmailResponse);
     fetchData(END_POINTS.FOOTER_TITLE, setFooterTitleResponse);
+    fetchData(END_POINTS.EMAILS_RECIEVER, setEmailsReciversResponse);
   }, []);
 
   const handleChangeEmailResponse = (
@@ -112,7 +116,7 @@ export const GeneralSettings = () => {
       // Update the state with the new object
       switch (key) {
         case 'email':
-          setEmailResponse(updatedApiResponse);
+          setFooterEmailResponse(updatedApiResponse);
           break;
         case 'phoneNumber':
           setPhoneNumberResponse(updatedApiResponse);
@@ -227,6 +231,34 @@ export const GeneralSettings = () => {
     try {
       let payload = {
         key: 'footer_email',
+        value: values.email,
+      };
+      setIsLoading(true);
+
+      await API.put(`${END_POINTS.UPDATE_GENERAL_SETTINGS}`, payload).then(
+        (res) => {
+          setIsLoading(true);
+          if (res.status == 200) {
+            toast.success('Operation completed successfully');
+            navigate('/');
+          } else {
+            toast.error(res.data.message);
+          }
+        },
+      );
+    } catch (error) {
+      setIsLoading(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const confirmUpdateEmailsReciever = async (values: any) => {
+    setIsLoading(true);
+
+    try {
+      let payload = {
+        key: 'email_reciever',
         value: values.email,
       };
       setIsLoading(true);
@@ -472,7 +504,7 @@ export const GeneralSettings = () => {
                 </Formik>
               </div>
             </div>
-            {/* Email Form */}
+            {/* Footer Email Form */}
             <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
               <div className="  border-stroke py-4 px-4 sm:px-7 dark:border-strokedark">
                 <h3 className="text-lg font-extrabold text-black dark:text-white">
@@ -484,9 +516,79 @@ export const GeneralSettings = () => {
                   onSubmit={(values) => confirmUpdateFooterEmail(values)}
                   enableReinitialize
                   initialValues={{
-                    email: emailResponse?.value,
+                    email: footerEmailResponse?.value,
                   }}
                   key={`FooterEmail`}
+                  validationSchema={EmailValidationSchema}
+                >
+                  {({
+                    values,
+                    errors,
+                    touched,
+                    handleChange,
+                    handleBlur,
+                    handleSubmit,
+                    setFieldValue,
+                    setValues,
+                  }) => (
+                    <>
+                      <form onSubmit={handleSubmit}>
+                        <div className="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
+                          {/* Email */}
+                          <div>
+                            <label className="mb-2 block text-sm font-medium text-black dark:text-white">
+                              Email
+                            </label>
+                            <div className="relative">
+                              <input
+                                className="w-full rounded border border-stroke bg-gray py-3 px-4 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
+                                type="text"
+                                name="email"
+                                id="email"
+                                onChange={(e) => {
+                                  handleChange(e);
+                                  setFieldValue('email', e.target.value); // Ensure Formik state updates
+                                }}
+                                onBlur={handleBlur}
+                                value={values.email}
+                              />
+                              {touched.email && errors.email && (
+                                <div className="text-red-500 text-sm mt-1">
+                                  {errors.email}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          type="submit"
+                          className="w-full rounded bg-primary py-3 px-4 text-white hover:bg-primary-dark"
+                        >
+                          Save
+                        </button>
+                      </form>
+                    </>
+                  )}
+                </Formik>
+              </div>
+            </div>
+
+            {/* Email Reciever Form */}
+            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+              <div className="  border-stroke py-4 px-4 sm:px-7 dark:border-strokedark">
+                <h3 className="text-lg font-extrabold text-black dark:text-white">
+                  Emails Reciever
+                </h3>
+              </div>
+              <div className="p-4 sm:p-7">
+                <Formik
+                  onSubmit={(values) => confirmUpdateEmailsReciever(values)}
+                  enableReinitialize
+                  initialValues={{
+                    email: emailsRecieverResponse?.value,
+                  }}
+                  key={`EmailReciever`}
                   validationSchema={EmailValidationSchema}
                 >
                   {({

@@ -394,7 +394,7 @@ export const EditProject = () => {
                         </label>
 
                         <select
-                          className="select max-w-47.5 sm:max-w-full xs:max-w-full text-slate-500  border-none bg-slate-200"
+                          className="select lg:max-w-md sm:max-w-full xs:max-w-full text-slate-500  border-none bg-slate-200"
                           value={projectTypeId}
                           onChange={(e) => setProjectTypeId(e.target.value)}
                         >
@@ -684,7 +684,7 @@ export const EditProject = () => {
                             </span>{' '}
                             or drag and drop
                           </p>
-                          <p className="mt-1.5">SVG, PNG, JPG or GIF</p>
+                          <p className="mt-1.5">Images OR Videos (Max 30mb)</p>
                           <p>(max, 800 X 800px)</p>
                         </div>
                       </div>

@@ -310,14 +310,14 @@ const AddProject: React.FC = () => {
                       </div>
 
                       {/* Project Type */}
-                      <div className="mb-4.5 flex lg:items-center xs:items-start flex-col lg:gap-6 md:gap-4 sm:gap-4 xs:gap-2 gap-6 xl:flex-row">
+                      <div className="mb-4.5  flex lg:items-center xs:items-start flex-col lg:gap-6 md:gap-4 sm:gap-4 xs:gap-2 gap-6 xl:flex-row">
                         <label className="lg:mb-2.5 block text-black dark:text-white">
                           Project Type
                           <br />
                         </label>
 
                         <select
-                          className="select lg:max-w-47.5 xs:max-w-full sm:max-w-full text-slate-500  border-none bg-slate-200"
+                          className="select lg:max-w-md xs:max-w-full sm:max-w-full text-slate-500  border-none bg-slate-200"
                           onChange={(e) => {
                             handleChange(e);
                             setFieldValue('projectTypeId', e.target.value);
@@ -548,7 +548,7 @@ const AddProject: React.FC = () => {
                             </span>{' '}
                             or drag and drop
                           </p>
-                          <p className="mt-1.5">SVG, PNG, JPG or GIF</p>
+                          <p className="mt-1.5">Images OR Videos (Max 30mb)</p>
                           <p>(max, 800 X 800px)</p>
                         </div>
                       </div>

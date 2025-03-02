@@ -434,8 +434,8 @@ export const PrivacyPolicy = () => {
                                 </span>{' '}
                                 or drag and drop
                               </p>
-                              <p className="mt-1.5">SVG, PNG, JPG or GIF</p>
-                              <p>(max, 800 X 800px)</p>
+                              <p className="mt-1.5">SVG, PNG, JPG</p>
+                              <p>(max, 7700px X 4320px)</p>
                             </div>
                           </div>
                           {/* New Uploaded Photo Preview */}

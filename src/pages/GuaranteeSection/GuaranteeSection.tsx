@@ -345,7 +345,7 @@ const GuaranteeSection = () => {
                             <span className="text-primary">
                               Click to upload
                             </span>
-                            <p>SVG, PNG, JPG, or GIF (max: 800x800px)</p>
+                            <p>SVG, PNG, JPG (max: 80x80px)</p>
                           </div>
                         </div>
                       )}

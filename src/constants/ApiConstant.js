@@ -35,12 +35,13 @@ export const END_POINTS = {
   FOOTER_EMAIL: 'api/admin/AppSetting/footer_email',
   FOOTER_TITLE: 'api/admin/AppSetting/footer_title',
   EMAILS_RECIEVER: 'api/admin/AppSetting/email_reciever',
+  EMAILS_SENDER: 'api/admin/AppSetting/email_sender',
+  APP_PASSWORD: 'api/admin/AppSetting/app_password',
   UPDATE_GENERAL_SETTINGS: 'api/admin/AppSetting',
   GET_SOCIAL_MEDIA_ICONS: 'api/admin/SocialMedia',
   UPDATE_SOCIAL_MEDIA_ICONS: 'api/admin/SocialMedia',
   ADD_SOCIAL_MEDIA_ICONS: 'api/admin/SocialMedia',
   DELETE_SOCIAL_MEDIA_ICONS: 'api/admin/SocialMedia',
-  GET_CONTACT_US: 'api/admin/ContactUs',   
+  GET_CONTACT_US: 'api/admin/ContactUs',
   UPDATE_CONTACT_US: 'api/admin/ContactUs',
-
 };

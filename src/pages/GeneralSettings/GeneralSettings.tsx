@@ -44,6 +44,13 @@ const LocationValidationSchema = Yup.object({
     'Google MapsLocation is required',
   ),
 });
+
+const emailSenderValidationSchema = Yup.object().shape({
+  email_sender: Yup.string()
+    .email('Invalid email format')
+    .required('Email is required'),
+  app_password: Yup.string().required('App password is required'),
+});
 export const GeneralSettings = () => {
   const navigate = useNavigate();
   const [fileUploadContentVisible, setFileUploadContentVisible] =
@@ -60,6 +67,13 @@ export const GeneralSettings = () => {
     useState<ApiResponse | null>(null);
   const [emailsRecieverResponse, setEmailsReciversResponse] =
     useState<ApiResponse | null>(null);
+
+  const [emailSenderResponse, setEmailSenderResponse] =
+    useState<ApiResponse | null>(null);
+
+  const [appPasswordResponse, setAppPasswordResponse] =
+    useState<ApiResponse | null>(null);
+
   const [phoneNumberResponse, setPhoneNumberResponse] =
     useState<ApiResponse | null>(null);
   const [footerTitleResponse, setFooterTitleResponse] =
@@ -89,6 +103,8 @@ export const GeneralSettings = () => {
     fetchData(END_POINTS.FOOTER_EMAIL, setFooterEmailResponse);
     fetchData(END_POINTS.FOOTER_TITLE, setFooterTitleResponse);
     fetchData(END_POINTS.EMAILS_RECIEVER, setEmailsReciversResponse);
+    fetchData(END_POINTS.EMAILS_SENDER, setEmailSenderResponse);
+    fetchData(END_POINTS.APP_PASSWORD, setAppPasswordResponse);
   }, []);
 
   const handleChangeEmailResponse = (
@@ -274,6 +290,52 @@ export const GeneralSettings = () => {
           }
         },
       );
+    } catch (error) {
+      setIsLoading(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const confirmUpdateEmailsSender = async (values: any) => {
+    setIsLoading(true);
+
+    try {
+      let payload = {
+        key: 'email_sender',
+        value: values.email_sender,
+      };
+
+      let appPasswordPayload = {
+        key: 'app_password',
+        value: values.app_password,
+      };
+      setIsLoading(true);
+
+      await API.put(`${END_POINTS.UPDATE_GENERAL_SETTINGS}`, payload).then(
+        (res) => {
+          setIsLoading(true);
+          if (res.status == 200) {
+            toast.success('Operation completed successfully');
+            // navigate('/');
+          } else {
+            toast.error(res.data.message);
+          }
+        },
+      );
+
+      await API.put(
+        `${END_POINTS.UPDATE_GENERAL_SETTINGS}`,
+        appPasswordPayload,
+      ).then((res) => {
+        setIsLoading(true);
+        if (res.status == 200) {
+          // toast.success('Operation completed successfully');
+          navigate('/');
+        } else {
+          toast.error(res.data.message);
+        }
+      });
     } catch (error) {
       setIsLoading(false);
     } finally {
@@ -625,6 +687,99 @@ export const GeneralSettings = () => {
                               {touched.email && errors.email && (
                                 <div className="text-red-500 text-sm mt-1">
                                   {errors.email}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          type="submit"
+                          className="w-full rounded bg-primary py-3 px-4 text-white hover:bg-primary-dark"
+                        >
+                          Save
+                        </button>
+                      </form>
+                    </>
+                  )}
+                </Formik>
+              </div>
+            </div>
+            {/* Email Sender Form */}
+            <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+              <div className="  border-stroke py-4 px-4 sm:px-7 dark:border-strokedark">
+                <h3 className="text-lg font-extrabold text-black dark:text-white">
+                  Email Sender
+                </h3>
+              </div>
+              <div className="p-4 sm:p-7">
+                <Formik
+                  onSubmit={(values) => confirmUpdateEmailsSender(values)}
+                  enableReinitialize
+                  initialValues={{
+                    email_sender: emailSenderResponse?.value,
+                    app_password: appPasswordResponse?.value,
+                  }}
+                  key={`EmailSender`}
+                  validationSchema={emailSenderValidationSchema}
+                >
+                  {({
+                    values,
+                    errors,
+                    touched,
+                    handleChange,
+                    handleBlur,
+                    handleSubmit,
+                    setFieldValue,
+                    setValues,
+                  }) => (
+                    <>
+                      <form onSubmit={handleSubmit}>
+                        <div className="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
+                          {/* Email Sender */}
+                          <div>
+                            <label className="mb-2 block text-sm font-medium text-black dark:text-white">
+                              Email
+                            </label>
+                            <div className="relative">
+                              <input
+                                className="w-full rounded border border-stroke bg-gray py-3 px-4 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
+                                name="email_sender"
+                                id="email_sender"
+                                onChange={(e) => {
+                                  handleChange(e);
+                                  setFieldValue('email_sender', e.target.value); // Ensure Formik state updates
+                                }}
+                                onBlur={handleBlur}
+                                value={values.email_sender}
+                              />
+                              {touched.email_sender && errors.email_sender && (
+                                <div className="text-red-500 text-sm mt-1">
+                                  {errors.email_sender}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div>
+                            <label className="mb-2 block text-sm font-medium text-black dark:text-white">
+                              App Password
+                            </label>
+                            <div className="relative">
+                              <input
+                                className="w-full rounded border border-stroke bg-gray py-3 px-4 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
+                                type="password"
+                                name="app_password"
+                                id="app_password"
+                                onChange={(e) => {
+                                  handleChange(e);
+                                  setFieldValue('app_password', e.target.value); // Ensure Formik state updates
+                                }}
+                                onBlur={handleBlur}
+                                value={values.app_password}
+                              />
+                              {touched.app_password && errors.app_password && (
+                                <div className="text-red-500 text-sm mt-1">
+                                  {errors.app_password}
                                 </div>
                               )}
                             </div>

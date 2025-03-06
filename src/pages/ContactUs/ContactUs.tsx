@@ -49,7 +49,7 @@ export const ContactUs = () => {
   useEffect(() => {
     setIsLoading(true);
 
-    API.get(`${END_POINTS.GET_CONTACT_US}/1`).then((res) => {
+    API.get(`${END_POINTS.GET_CONTACT_US}/2`).then((res) => {
       if (res.status == 200) {
         setApiResponse(res.data.data);
 
@@ -91,7 +91,7 @@ export const ContactUs = () => {
       const formData = new FormData();
 
       // Append form fields to FormData
-      formData.append('Id', '1');
+      formData.append('Id', '2');
       formData.append(
         'MainImage',
         mainFilePath.length != 0 ? mainFilePath : values.mainImage,

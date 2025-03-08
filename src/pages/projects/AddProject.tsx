@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import moment from 'moment';
-import API from '../../Api/Api';
 import { END_POINTS } from '../../constants/ApiConstant';
 import Loader from '../../common/Loader';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb.js';
@@ -11,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
 import { BaseURL } from '../../constants/Bases.js';
+import imageCompression from 'browser-image-compression';
 
 interface FilePreview {
   file: File;
@@ -25,9 +24,11 @@ const validationSchema = Yup.object().shape({
 const AddProject: React.FC = () => {
   const navigate = useNavigate();
   const [files, setFiles] = useState<FilePreview[]>([]);
+  const [fileProgress, setFileProgress] = useState({});
 
   const [isLoading, setIsLoading] = useState(false);
   const [projectTypeId, setProjectTypeId] = useState('1');
+  const [mediaUIDs, setMediaUIDs] = useState<string[]>([]);
 
   const [mainFile, setMainFile] = useState<File | null>(null);
   const [imageUploadWrapClass, setImageUploadWrapClass] =
@@ -49,13 +50,69 @@ const AddProject: React.FC = () => {
 
   useEffect(() => {}, []);
 
-  const onDrop = (acceptedFiles: File[]) => {
-    const newFiles = acceptedFiles.map((file) => ({
-      file,
-      preview: URL.createObjectURL(file),
-    }));
-    setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+  const onDrop = async (acceptedFiles: File[]) => {
+    const newFiles = await Promise.all(
+      acceptedFiles.map(async (file) => {
+        setFileProgress((prevProgress) => ({
+          ...prevProgress,
+          [file.name]: 'uploading',
+        }));
+
+        const options = {
+          maxSizeMB: 1, // Reduce file size to 1MB
+          maxWidthOrHeight: 1920, // Resize large images
+          useWebWorker: true, // Improve performance
+        };
+
+        try {
+          const compressedFile = await imageCompression(file, options); // ✅ Wait for compression
+          setFiles((prevFiles) => [
+            ...prevFiles,
+            { file, preview: URL.createObjectURL(compressedFile) },
+          ]);
+
+          const formData = new FormData();
+          formData.append('file', compressedFile); // ✅ Upload the compressed file
+
+          const data = {
+            File: compressedFile,
+            MediaType: file.type.includes('image') ? 1 : 2,
+            Directory: 8,
+          };
+
+          const mediaResponse = await axios.post(
+            `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`,
+            data,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'multipart/form-data',
+              },
+            },
+          );
+
+          if (mediaResponse.status === 200) {
+            setMediaUIDs((prev) => [...prev, mediaResponse.data.id]); // ✅ Correct way to update state
+          }
+        } catch (error) {
+          console.error('Upload failed:', error);
+        } finally {
+          setFileProgress((prevProgress) => ({
+            ...prevProgress,
+            [file.name]: 'uploaded',
+          }));
+        }
+
+        return {
+          file,
+          preview: URL.createObjectURL(file),
+        };
+      }),
+    );
+
+    // setFiles((prevFiles) => [...prevFiles, ...newFiles]);
   };
+
   const onDropRejected = (fileRejections: any[]) => {
     fileRejections.forEach((file) => {
       // Display an error message for each rejected file
@@ -83,21 +140,6 @@ const AddProject: React.FC = () => {
     setImageUploadWrapClass('image-upload-wrap');
     setFileUploadContentVisible(false);
     setShowOldMainImage(false); // Hide the old main image
-  };
-  const readURL = (input: any) => {
-    if (input.files && input.files[0]) {
-      const reader = new FileReader();
-
-      reader.onload = (e) => {
-        setImageUploadWrapClass('image-upload-wrap image-dropping');
-        setFileUploadContentVisible(true);
-        setMainFile(input.files[0]);
-      };
-
-      reader.readAsDataURL(input.files[0]);
-    } else {
-      removeUpload();
-    }
   };
 
   const readMainImageURL = (input: any) => {
@@ -142,33 +184,33 @@ const AddProject: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const mediaUIDs: string[] = [];
+      // const mediaUIDs: string[] = [];
 
-      // First: Upload all media files
-      for (let i = 0; i < files.length; i++) {
-        const formData = new FormData();
-        formData.append('file', files[i].file);
-        const data = {
-          File: files[i].file,
-          MediaType: files[i].file.type.includes('image') ? 1 : 2,
-          Directory: 8,
-        };
+      // // First: Upload all media files
+      // for (let i = 0; i < files.length; i++) {
+      //   const formData = new FormData();
+      //   formData.append('file', files[i].file);
+      //   const data = {
+      //     File: files[i].file,
+      //     MediaType: files[i].file.type.includes('image') ? 1 : 2,
+      //     Directory: 8,
+      //   };
 
-        const mediaResponse = await axios.post(
-          `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`,
-          data,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
-              'Content-Type': 'multipart/form-data',
-            },
-          },
-        );
+      //   const mediaResponse = await axios.post(
+      //     `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`,
+      //     data,
+      //     {
+      //       headers: {
+      //         Authorization: `Bearer ${localStorage.getItem('token')}`,
+      //         'Content-Type': 'multipart/form-data',
+      //       },
+      //     },
+      //   );
 
-        if (mediaResponse.status === 200) {
-          mediaUIDs.push(mediaResponse.data.id);
-        }
-      }
+      //   if (mediaResponse.status === 200) {
+      //     mediaUIDs.push(mediaResponse.data.id);
+      //   }
+      // }
 
       // Second: Upload the main image
       const mainImageData = {
@@ -559,61 +601,79 @@ const AddProject: React.FC = () => {
                           marginTop: '10px',
                         }}
                       >
-                        {files.map(({ file, preview }, index) => (
+                        {files.map((file) => (
                           <div
-                            key={index}
+                            key={file.file.name}
                             style={{
                               margin: '10px',
                               display: 'flex',
                               flexDirection: 'column',
                               alignItems: 'center',
                             }}
+                            className="flex flex-row gap-4"
                           >
-                            {file.type.startsWith('image') && (
-                              <img
-                                src={preview}
-                                alt={file.name}
-                                style={{
-                                  width: '100px',
-                                  height: '100px',
-                                  objectFit: 'cover',
-                                }}
-                              />
+                            {fileProgress[file.file.name] === 'uploading' && (
+                              <div role="status">
+                                <svg
+                                  aria-hidden="true"
+                                  className="inline w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+                                  viewBox="0 0 100 101"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                                    fill="currentColor"
+                                  />
+                                  <path
+                                    d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                                    fill="currentFill"
+                                  />
+                                </svg>
+                                <span className="sr-only">Loading...</span>
+                              </div>
                             )}
-                            {file.type.startsWith('video') && (
-                              <video
-                                src={preview}
-                                controls
-                                style={{ width: '100px', height: '100px' }}
-                              />
+                            {fileProgress[file.file.name] === 'uploaded' && (
+                              <>
+                                {file.file.type.startsWith('image') && (
+                                  <img
+                                    src={file.preview}
+                                    alt={file.file.name}
+                                    style={{
+                                      width: '100px',
+                                      height: '100px',
+                                      objectFit: 'cover',
+                                    }}
+                                  />
+                                )}
+                                {file.file.type.startsWith('video') && (
+                                  <video
+                                    src={file.preview}
+                                    controls
+                                    style={{ width: '100px', height: '100px' }}
+                                  />
+                                )}
+                              </>
                             )}
-                            <div
-                              className="mt-4"
-                              onClick={() => removeFile(file.name)}
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                              >
-                                <path
-                                  d="M5 8V18C5 20.2091 6.79086 22 9 22H15C17.2091 22 19 20.2091 19 18V8M14 11V17M10 11L10 17M16 5L14.5937 2.8906C14.2228 2.3342 13.5983 2 12.9296 2H11.0704C10.4017 2 9.7772 2.3342 9.40627 2.8906L8 5M16 5H8M16 5H21M8 5H3"
-                                  stroke="#EB001B"
-                                  stroke-width="1.5"
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                />
-                              </svg>
-                            </div>
                           </div>
                         ))}
                       </div>
-
-                      <button className="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90">
-                        Save
-                      </button>
+                      {Object.values(fileProgress).includes('uploading') ? (
+                        <>
+                          <button
+                            className="flex w-full cursor-not-allowed justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+                            disabled
+                          >
+                            Save
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button className="flex w-full  justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90">
+                            Save
+                          </button>{' '}
+                        </>
+                      )}
                     </div>
                   </form>
                 </>

@@ -10,6 +10,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { max } from 'moment';
+import imageCompression from 'browser-image-compression';
 
 interface FilePreview {
   file: File;
@@ -139,7 +140,17 @@ const GuaranteeSection = () => {
 
       for (const { file, index } of files) {
         const formData = new FormData();
-        formData.append('file', file);
+        const options = {
+          maxSizeMB: 1, // Reduce file size to 1MB
+          maxWidthOrHeight: 1920, // Resize large images
+          useWebWorker: true, // Improve performance
+        };
+        const blobFile = await imageCompression(file, options);
+        const compressedFile = new File([blobFile], file.name, {
+          type: file.type,
+          lastModified: Date.now(),
+        });
+        formData.append('file', compressedFile);
         formData.append('MediaType', '1');
         formData.append('Directory', '5');
 

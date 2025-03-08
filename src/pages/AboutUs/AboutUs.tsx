@@ -11,6 +11,8 @@ import { BaseURL } from '../../constants/Bases.js';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import imageCompression from 'browser-image-compression';
+
 interface ApiResponse {
   id: string;
   mainImage: string;
@@ -96,10 +98,19 @@ export const AboutUs = () => {
     try {
       if (file != null) {
         const formData = new FormData();
-
-        formData.append('file', file);
+        const options = {
+          maxSizeMB: 1, // Reduce file size to 1MB
+          maxWidthOrHeight: 1920, // Resize large images
+          useWebWorker: true, // Improve performance
+        };
+        const blobFile = await imageCompression(file, options);
+        const compressedFile = new File([blobFile], file.name, {
+          type: file.type,
+          lastModified: Date.now(),
+        });
+        formData.append('file', compressedFile);
         const data = {
-          File: file,
+          File: compressedFile,
           MediaType: 1,
           Directory: 9,
         };

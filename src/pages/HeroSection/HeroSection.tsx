@@ -11,6 +11,7 @@ import { END_POINTS } from '../../constants/ApiConstant';
 import { BaseURL } from '../../constants/Bases.js';
 import SelectGroupOne from '../../components/Forms/SelectGroup/SelectGroupOne';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
+import imageCompression from 'browser-image-compression';
 
 interface ApiResponse {
   id: string;
@@ -78,10 +79,19 @@ export const HeroSection = () => {
     try {
       if (subFile != null) {
         const formData = new FormData();
-
-        formData.append('file', subFile);
+        const options = {
+          maxSizeMB: 1, // Reduce file size to 1MB
+          maxWidthOrHeight: 1920, // Resize large images
+          useWebWorker: true, // Improve performance
+        };
+        const blobFile = await imageCompression(subFile, options);
+        const compressedFile = new File([blobFile], subFile.name, {
+          type: subFile.type,
+          lastModified: Date.now(),
+        });
+        formData.append('file', compressedFile);
         const data = {
-          File: subFile,
+          File: compressedFile,
           MediaType: 1,
           Directory: 1,
         };
@@ -103,10 +113,19 @@ export const HeroSection = () => {
       }
       if (file != null) {
         const formData = new FormData();
-
-        formData.append('file', file);
+        const options = {
+          maxSizeMB: 1, // Reduce file size to 1MB
+          maxWidthOrHeight: 1920, // Resize large images
+          useWebWorker: true, // Improve performance
+        };
+        const blobFile = await imageCompression(file, options);
+        const compressedFile = new File([blobFile], file.name, {
+          type: file.type,
+          lastModified: Date.now(),
+        });
+        formData.append('file', compressedFile);
         const data = {
-          File: file,
+          File: compressedFile,
           MediaType: 1,
           Directory: 1,
         };

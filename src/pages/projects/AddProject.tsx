@@ -14,6 +14,7 @@ import imageCompression from 'browser-image-compression';
 interface FilePreview {
   file: File;
   preview: string;
+  UID: string;
 }
 const validationSchema = Yup.object().shape({
   projectTypeId: Yup.string().required('Please Select Project Type'),
@@ -65,10 +66,19 @@ const AddProject: React.FC = () => {
         };
 
         try {
-          const compressedFile = await imageCompression(file, options); // ✅ Wait for compression
+          const blobFile = await imageCompression(file, options);
+          const compressedFile = new File([blobFile], file.name, {
+            type: file.type,
+            lastModified: Date.now(),
+          });
+
           setFiles((prevFiles) => [
             ...prevFiles,
-            { file, preview: URL.createObjectURL(compressedFile) },
+            {
+              file,
+              preview: URL.createObjectURL(compressedFile),
+              UID: crypto.randomUUID(),
+            },
           ]);
 
           const formData = new FormData();
@@ -129,10 +139,11 @@ const AddProject: React.FC = () => {
     multiple: true,
   });
 
-  const removeFile = (fileName: string) => {
+  const removeFile = (fileName: string, UID: string) => {
     setFiles((prevFiles) =>
       prevFiles.filter((filePreview) => filePreview.file.name !== fileName),
     );
+    setMediaUIDs((prevUIDs) => prevUIDs.filter((uid) => uid !== UID));
   };
 
   const removeUpload = () => {
@@ -184,37 +195,19 @@ const AddProject: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // const mediaUIDs: string[] = [];
-
-      // // First: Upload all media files
-      // for (let i = 0; i < files.length; i++) {
-      //   const formData = new FormData();
-      //   formData.append('file', files[i].file);
-      //   const data = {
-      //     File: files[i].file,
-      //     MediaType: files[i].file.type.includes('image') ? 1 : 2,
-      //     Directory: 8,
-      //   };
-
-      //   const mediaResponse = await axios.post(
-      //     `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`,
-      //     data,
-      //     {
-      //       headers: {
-      //         Authorization: `Bearer ${localStorage.getItem('token')}`,
-      //         'Content-Type': 'multipart/form-data',
-      //       },
-      //     },
-      //   );
-
-      //   if (mediaResponse.status === 200) {
-      //     mediaUIDs.push(mediaResponse.data.id);
-      //   }
-      // }
-
+      const options = {
+        maxSizeMB: 1, // Reduce file size to 1MB
+        maxWidthOrHeight: 1920, // Resize large images
+        useWebWorker: true, // Improve performance
+      };
+      const blobFile = await imageCompression(mainFile, options);
+      const compressedFile = new File([blobFile], mainFile.name, {
+        type: mainFile.type,
+        lastModified: Date.now(),
+      });
       // Second: Upload the main image
       const mainImageData = {
-        File: mainFile,
+        File: compressedFile,
         MediaType: 1,
         Directory: 8,
       };
@@ -362,7 +355,9 @@ const AddProject: React.FC = () => {
                           className="select lg:max-w-md xs:max-w-full sm:max-w-full text-slate-500  border-none bg-slate-200"
                           onChange={(e) => {
                             handleChange(e);
-                            setFieldValue('projectTypeId', e.target.value);
+                            handleChangeValues(e.target.value, 'projectTypeId');
+
+                            // setFieldValue('projectTypeId', e.target.value);
                           }}
                           value={values.projectTypeId}
                         >
@@ -394,6 +389,7 @@ const AddProject: React.FC = () => {
                               id="mainPage"
                               onChange={(e) => {
                                 handleChange(e);
+                                // setFieldValue('mainPage', e.target.checked);
 
                                 // Use `e.target.checked` for the checkbox value
                                 handleChangeValues(
@@ -653,6 +649,16 @@ const AddProject: React.FC = () => {
                                     style={{ width: '100px', height: '100px' }}
                                   />
                                 )}
+                                <div
+                                  className="mt-4"
+                                  onClick={() =>
+                                    removeFile(file.file.name, file.UID)
+                                  }
+                                >
+                                  <span className="text-sm hover:text-red-600">
+                                    Delete
+                                  </span>
+                                </div>
                               </>
                             )}
                           </div>

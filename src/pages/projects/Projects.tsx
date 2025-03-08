@@ -164,9 +164,7 @@ const Projects: React.FC = () => {
         if (res && res.data) {
           toast.success('Operation completed successfully');
 
-          setTimeout(() => {
-            retrieveProjects();
-          }, 5000);
+          retrieveProjects();
         }
       })
       .catch((error) => {

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import Loader from '../../common/Loader';
@@ -9,7 +8,6 @@ import * as Yup from 'yup';
 import { Formik, FormikHelpers } from 'formik';
 import { END_POINTS } from '../../constants/ApiConstant';
 import { BaseURL } from '../../constants/Bases.js';
-import SelectGroupOne from '../../components/Forms/SelectGroup/SelectGroupOne';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 import { useDropzone } from 'react-dropzone';
 import imageCompression from 'browser-image-compression';
@@ -207,6 +205,14 @@ export const EditProject = () => {
       setApiResponse(updatedApiResponse);
     }
   };
+  const fetchFile = async (file: File): Promise<ArrayBuffer> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as ArrayBuffer);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsArrayBuffer(file);
+    });
+  };
 
   const onDrop = async (acceptedFiles: File[]) => {
     const newFiles = await Promise.all(
@@ -215,36 +221,16 @@ export const EditProject = () => {
           ...prevProgress,
           [file.name]: 'uploading',
         }));
-
-        const options = {
-          maxSizeMB: 1, // Reduce file size to 1MB
-          maxWidthOrHeight: 1920, // Resize large images
-          useWebWorker: true, // Improve performance
-          fileType: 'image/jpeg', // Force JPEG format
-        };
-
-        try {
-          const blobFile = await imageCompression(file, options);
-          const compressedFile = new File([blobFile], file.name, {
-            type: file.type,
-            lastModified: Date.now(),
-          });
-
+        if (file.type.startsWith('video/')) {
           setFiles((prevFiles) => [
             ...prevFiles,
-            { file, preview: URL.createObjectURL(compressedFile), UID: '' },
+            { file, preview: URL.createObjectURL(file), UID: '' },
           ]);
 
           const formData = new FormData();
-          formData.append('file', compressedFile);
-          formData.append('MediaType', file.type.includes('image') ? '1' : '2');
+          formData.append('file', file);
+          formData.append('MediaType', '2');
           formData.append('Directory', '8');
-
-          // const data = {
-          //   File: compressedFile,
-          //   MediaType: file.type.includes('image') ? 1 : 2,
-          //   Directory: 8,
-          // };
 
           const mediaResponse = await axios.post(
             `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`,
@@ -258,15 +244,62 @@ export const EditProject = () => {
           );
 
           if (mediaResponse.status === 200) {
-            setMediaUIDs((prev) => [...prev, mediaResponse.data.id]); // ✅ Correct way to update state
+            setMediaUIDs((prev) => [...prev, mediaResponse.data.id]);
+            setFileProgress((prevProgress) => ({
+              ...prevProgress,
+              [file.name]: 'uploaded',
+            }));
           }
-        } catch (error) {
-          console.error('Upload failed:', error);
-        } finally {
-          setFileProgress((prevProgress) => ({
-            ...prevProgress,
-            [file.name]: 'uploaded',
-          }));
+        } else {
+          const options = {
+            maxSizeMB: 1, // Reduce file size to 1MB
+            maxWidthOrHeight: 1920, // Resize large images
+            useWebWorker: true, // Improve performance
+            fileType: 'image/jpeg', // Force JPEG format
+          };
+
+          try {
+            const blobFile = await imageCompression(file, options);
+            const compressedFile = new File([blobFile], file.name, {
+              type: file.type,
+              lastModified: Date.now(),
+            });
+
+            setFiles((prevFiles) => [
+              ...prevFiles,
+              { file, preview: URL.createObjectURL(compressedFile), UID: '' },
+            ]);
+
+            const formData = new FormData();
+            formData.append('file', compressedFile);
+            formData.append(
+              'MediaType',
+              file.type.includes('image') ? '1' : '2',
+            );
+            formData.append('Directory', '8');
+
+            const mediaResponse = await axios.post(
+              `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`,
+              formData,
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem('token')}`,
+                  'Content-Type': 'multipart/form-data',
+                },
+              },
+            );
+
+            if (mediaResponse.status === 200) {
+              setMediaUIDs((prev) => [...prev, mediaResponse.data.id]);
+            }
+          } catch (error) {
+            console.error('Upload failed:', error);
+          } finally {
+            setFileProgress((prevProgress) => ({
+              ...prevProgress,
+              [file.name]: 'uploaded',
+            }));
+          }
         }
 
         return {

@@ -58,43 +58,20 @@ const AddProject: React.FC = () => {
           ...prevProgress,
           [file.name]: 'uploading',
         }));
-
-        const options = {
-          maxSizeMB: 1, // Reduce file size to 1MB
-          maxWidthOrHeight: 1920, // Resize large images
-          useWebWorker: true, // Improve performance
-        };
-
-        try {
-          const blobFile = await imageCompression(file, options);
-          const compressedFile = new File([blobFile], file.name, {
-            type: file.type,
-            lastModified: Date.now(),
-          });
-          let uid =
-            Date.now().toString(36) +
-            Math.random().toString(36).substring(2, 10);
+        if (file.type.startsWith('video/')) {
           setFiles((prevFiles) => [
             ...prevFiles,
-            {
-              file,
-              preview: URL.createObjectURL(compressedFile),
-              UID: uid,
-            },
+            { file, preview: URL.createObjectURL(file), UID: '' },
           ]);
 
           const formData = new FormData();
-          formData.append('file', compressedFile); // ✅ Upload the compressed file
-
-          const data = {
-            File: compressedFile,
-            MediaType: file.type.includes('image') ? 1 : 2,
-            Directory: 8,
-          };
+          formData.append('file', file);
+          formData.append('MediaType', '2');
+          formData.append('Directory', '8');
 
           const mediaResponse = await axios.post(
             `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`,
-            data,
+            formData,
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -104,29 +81,82 @@ const AddProject: React.FC = () => {
           );
 
           if (mediaResponse.status === 200) {
-            setMediaUIDs((prev) => [...prev, mediaResponse.data.id]); // ✅ Correct way to update state
-            setFiles((prevFiles) =>
-              prevFiles.map((file) => {
-                if (file.UID === uid) {
-                  return { ...file, UID: mediaResponse.data.id };
-                }
-                return file;
-              }),
-            );
+            setMediaUIDs((prev) => [...prev, mediaResponse.data.id]);
+            setFileProgress((prevProgress) => ({
+              ...prevProgress,
+              [file.name]: 'uploaded',
+            }));
           }
-        } catch (error) {
-          console.error('Upload failed:', error);
-        } finally {
-          setFileProgress((prevProgress) => ({
-            ...prevProgress,
-            [file.name]: 'uploaded',
-          }));
-        }
+        } else {
+          const options = {
+            maxSizeMB: 1, // Reduce file size to 1MB
+            maxWidthOrHeight: 1920, // Resize large images
+            useWebWorker: true, // Improve performance
+          };
 
-        return {
-          file,
-          preview: URL.createObjectURL(file),
-        };
+          try {
+            const blobFile = await imageCompression(file, options);
+            const compressedFile = new File([blobFile], file.name, {
+              type: file.type,
+              lastModified: Date.now(),
+            });
+            let uid =
+              Date.now().toString(36) +
+              Math.random().toString(36).substring(2, 10);
+            setFiles((prevFiles) => [
+              ...prevFiles,
+              {
+                file,
+                preview: URL.createObjectURL(compressedFile),
+                UID: uid,
+              },
+            ]);
+
+            const formData = new FormData();
+            formData.append('file', compressedFile); // ✅ Upload the compressed file
+
+            const data = {
+              File: compressedFile,
+              MediaType: file.type.includes('image') ? 1 : 2,
+              Directory: 8,
+            };
+
+            const mediaResponse = await axios.post(
+              `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`,
+              data,
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem('token')}`,
+                  'Content-Type': 'multipart/form-data',
+                },
+              },
+            );
+
+            if (mediaResponse.status === 200) {
+              setMediaUIDs((prev) => [...prev, mediaResponse.data.id]); // ✅ Correct way to update state
+              setFiles((prevFiles) =>
+                prevFiles.map((file) => {
+                  if (file.UID === uid) {
+                    return { ...file, UID: mediaResponse.data.id };
+                  }
+                  return file;
+                }),
+              );
+            }
+          } catch (error) {
+            console.error('Upload failed:', error);
+          } finally {
+            setFileProgress((prevProgress) => ({
+              ...prevProgress,
+              [file.name]: 'uploaded',
+            }));
+          }
+
+          return {
+            file,
+            preview: URL.createObjectURL(file),
+          };
+        }
       }),
     );
 

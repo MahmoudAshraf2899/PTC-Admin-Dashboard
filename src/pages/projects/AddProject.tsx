@@ -71,13 +71,15 @@ const AddProject: React.FC = () => {
             type: file.type,
             lastModified: Date.now(),
           });
-
+          let uid =
+            Date.now().toString(36) +
+            Math.random().toString(36).substring(2, 10);
           setFiles((prevFiles) => [
             ...prevFiles,
             {
               file,
               preview: URL.createObjectURL(compressedFile),
-              UID: crypto.randomUUID(),
+              UID: uid,
             },
           ]);
 
@@ -103,6 +105,14 @@ const AddProject: React.FC = () => {
 
           if (mediaResponse.status === 200) {
             setMediaUIDs((prev) => [...prev, mediaResponse.data.id]); // ✅ Correct way to update state
+            setFiles((prevFiles) =>
+              prevFiles.map((file) => {
+                if (file.UID === uid) {
+                  return { ...file, UID: mediaResponse.data.id };
+                }
+                return file;
+              }),
+            );
           }
         } catch (error) {
           console.error('Upload failed:', error);
@@ -140,6 +150,7 @@ const AddProject: React.FC = () => {
   });
 
   const removeFile = (fileName: string, UID: string) => {
+    console.log('media:', mediaUIDs);
     setFiles((prevFiles) =>
       prevFiles.filter((filePreview) => filePreview.file.name !== fileName),
     );

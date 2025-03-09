@@ -105,7 +105,7 @@ export const EditProject = () => {
           acc[file.file.name] = 'uploaded';
           return acc;
         }, {});
-
+        setMediaUIDs(mediaFiles.map((f) => f.UID));
         setFiles(mediaFiles);
         setFileProgress(fileProgressUpdate);
 

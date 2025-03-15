@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { Formik } from 'formik';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 import API from '../../Api/Api';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Logo from '../../images/logo/PTCLOGO.png';
 import { useAuth } from '../../Auth/auth';
-import { useNavigate } from 'react-router-dom';
 import { END_POINTS } from '../../constants/ApiConstant';
 import ButtonLoader from '../../common/ButtonLoader/ButtonLoader';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
 
 const SignIn: React.FC = () => {
   const dispatch = useDispatch();
@@ -18,43 +17,43 @@ const SignIn: React.FC = () => {
   const [userName, setUserName] = useState('');
   const [userPassword, setUserPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  useEffect(() => {
-    localStorage.clear();
-  }, []);
 
-  const handleLoginSubmit = () => {
+  const validationSchema = Yup.object({
+    personalKey: Yup.string().required('Username is required'),
+    password: Yup.string().required('Password is required'),
+  });
+  useEffect(() => {}, []);
+
+  const handleLoginSubmit = async (values: {
+    personalKey: string;
+    password: string;
+  }) => {
     setIsLoading(true);
-    let obj = {
-      personalKey: userName,
-      password: userPassword,
-    };
-    API.post(END_POINTS.LOGIN, obj)
-      .then((response) => {
-        if (response) {
-          let userType = 1;
+    try {
+      localStorage.removeItem('token');
+      localStorage.removeItem('fullName');
+      localStorage.removeItem('email');
+      localStorage.removeItem('id');
+      const response = await API.post(END_POINTS.LOGIN, values);
+      if (response?.data?.data) {
+        const { accessToken, fullName, email, id } = response.data.data;
 
-          localStorage.setItem('token', response.data.data.accessToken);
-          localStorage.setItem('fullName', response.data.data.fullName);
-          localStorage.setItem('email', response.data.data.email);
-          localStorage.setItem('id', response.data.data.id);
-          auth?.login(userType);
+        localStorage.setItem('token', accessToken);
+        localStorage.setItem('fullName', fullName);
+        localStorage.setItem('email', email);
+        localStorage.setItem('id', id);
 
-          setIsLoading(false);
-          navigate('/');
-          window.location.reload();
-        } else {
-          localStorage.clear();
-          setIsLoading(false);
-          toast.error('something went wrong');
-        }
-      })
-      .catch((error) => {
-        toast.error(error.message);
-        setIsLoading(false);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
+        auth?.login(1);
+        navigate('/');
+        window.location.reload();
+      } else {
+        toast.error('Something went wrong');
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Login failed');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -199,118 +198,117 @@ const SignIn: React.FC = () => {
               Sign In to PTC Dashboard
             </h2>
             <Formik
-              onSubmit={() => handleLoginSubmit()}
-              initialValues={{}}
-              // validationSchema={LoginSchema}
+              initialValues={{ personalKey: '', password: '' }}
+              validationSchema={validationSchema}
+              onSubmit={handleLoginSubmit}
             >
-              {({
-                values,
-                errors,
-                touched,
-                handleBlur,
-                handleChange,
-                handleSubmit,
-              }) => (
-                <>
-                  <form onSubmit={handleSubmit}>
-                    <div className="mb-4">
-                      <label className="mb-2.5 block font-medium text-black dark:text-white">
-                        UserName
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          onChange={(e) => setUserName(e.target.value)}
-                          placeholder="Enter your user name"
-                          className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                        />
-
-                        <span className="absolute right-4 top-4">
-                          <svg
-                            width="22"
-                            height="22"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                            <g
-                              id="SVGRepo_tracerCarrier"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                            ></g>
-                            <g id="SVGRepo_iconCarrier">
-                              {' '}
-                              <circle
-                                cx="12"
-                                cy="6"
-                                r="4"
-                                stroke="rgb(100 116 139)"
-                                stroke-width="1.5"
-                              ></circle>{' '}
-                              <path
-                                d="M19.9975 18C20 17.8358 20 17.669 20 17.5C20 15.0147 16.4183 13 12 13C7.58172 13 4 15.0147 4 17.5C4 19.9853 4 22 12 22C14.231 22 15.8398 21.8433 17 21.5634"
-                                stroke="rgb(100 116 139)"
-                                stroke-width="1.5"
-                                stroke-linecap="round"
-                              ></path>{' '}
-                            </g>
-                          </svg>
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="mb-6">
-                      <label className="mb-2.5 block font-medium text-black dark:text-white">
-                        Password
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="password"
-                          onChange={(e) => setUserPassword(e.target.value)}
-                          placeholder="6+ Characters, 1 Capital letter"
-                          className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                        />
-
-                        <span className="absolute right-4 top-4">
-                          <svg
-                            className="fill-current"
-                            width="22"
-                            height="22"
-                            viewBox="0 0 22 22"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <g opacity="0.5">
-                              <path
-                                d="M16.1547 6.80626V5.91251C16.1547 3.16251 14.0922 0.825009 11.4797 0.618759C10.0359 0.481259 8.59219 0.996884 7.52656 1.95938C6.46094 2.92188 5.84219 4.29688 5.84219 5.70626V6.80626C3.84844 7.18438 2.33594 8.93751 2.33594 11.0688V17.2906C2.33594 19.5594 4.19219 21.3813 6.42656 21.3813H15.5016C17.7703 21.3813 19.6266 19.525 19.6266 17.2563V11C19.6609 8.93751 18.1484 7.21876 16.1547 6.80626ZM8.55781 3.09376C9.31406 2.40626 10.3109 2.06251 11.3422 2.16563C13.1641 2.33751 14.6078 3.98751 14.6078 5.91251V6.70313H7.38906V5.67188C7.38906 4.70938 7.80156 3.78126 8.55781 3.09376ZM18.1141 17.2906C18.1141 18.7 16.9453 19.8688 15.5359 19.8688H6.46094C5.05156 19.8688 3.91719 18.7344 3.91719 17.325V11.0688C3.91719 9.52189 5.15469 8.28438 6.70156 8.28438H15.2953C16.8422 8.28438 18.1141 9.52188 18.1141 11V17.2906Z"
-                                fill=""
-                              />
-                              <path
-                                d="M10.9977 11.8594C10.5852 11.8594 10.207 12.2031 10.207 12.65V16.2594C10.207 16.6719 10.5508 17.05 10.9977 17.05C11.4102 17.05 11.7883 16.7063 11.7883 16.2594V12.6156C11.7883 12.2031 11.4102 11.8594 10.9977 11.8594Z"
-                                fill=""
-                              />
-                            </g>
-                          </svg>
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="mb-5">
-                      {isLoading ? (
-                        <ButtonLoader />
-                      ) : (
-                        <button
-                          // type="submit"
-                          //value="Sign In"
-                          className="w-full cursor-pointer rounded-lg border default-border-color default-bg-color p-4 text-white transition hover:bg-opacity-90"
+              {({ isSubmitting }) => (
+                <Form>
+                  <div className="mb-4">
+                    <label
+                      htmlFor="personalKey"
+                      className="mb-2.5 block font-medium text-black dark:text-white"
+                    >
+                      Username
+                    </label>
+                    <div className="relative">
+                      <Field
+                        name="personalKey"
+                        type="text"
+                        placeholder="Enter your user name"
+                        className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      />
+                      <ErrorMessage
+                        name="personalKey"
+                        component="div"
+                        className="text-red-500 text-sm"
+                      />
+                      <span className="absolute right-4 top-4">
+                        <svg
+                          width="22"
+                          height="22"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
                         >
-                          Sign In
-                        </button>
-                      )}
+                          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                          <g
+                            id="SVGRepo_tracerCarrier"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          ></g>
+                          <g id="SVGRepo_iconCarrier">
+                            {' '}
+                            <circle
+                              cx="12"
+                              cy="6"
+                              r="4"
+                              stroke="rgb(100 116 139)"
+                              stroke-width="1.5"
+                            ></circle>{' '}
+                            <path
+                              d="M19.9975 18C20 17.8358 20 17.669 20 17.5C20 15.0147 16.4183 13 12 13C7.58172 13 4 15.0147 4 17.5C4 19.9853 4 22 12 22C14.231 22 15.8398 21.8433 17 21.5634"
+                              stroke="rgb(100 116 139)"
+                              stroke-width="1.5"
+                              stroke-linecap="round"
+                            ></path>{' '}
+                          </g>
+                        </svg>
+                      </span>
                     </div>
-                  </form>
-                </>
+                  </div>
+
+                  <div className="mb-4">
+                    <label
+                      htmlFor="password"
+                      className="mb-2.5 block font-medium text-black dark:text-white"
+                    >
+                      Password
+                    </label>
+                    <div className="relative">
+                      <Field
+                        name="password"
+                        type="password"
+                        placeholder="6+ Characters, 1 Capital letter"
+                        className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      />
+                      <ErrorMessage
+                        name="password"
+                        component="div"
+                        className="text-red-500 text-sm"
+                      />
+                      <span className="absolute right-4 top-4">
+                        <svg
+                          className="fill-current"
+                          width="22"
+                          height="22"
+                          viewBox="0 0 22 22"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <g opacity="0.5">
+                            <path
+                              d="M16.1547 6.80626V5.91251C16.1547 3.16251 14.0922 0.825009 11.4797 0.618759C10.0359 0.481259 8.59219 0.996884 7.52656 1.95938C6.46094 2.92188 5.84219 4.29688 5.84219 5.70626V6.80626C3.84844 7.18438 2.33594 8.93751 2.33594 11.0688V17.2906C2.33594 19.5594 4.19219 21.3813 6.42656 21.3813H15.5016C17.7703 21.3813 19.6266 19.525 19.6266 17.2563V11C19.6609 8.93751 18.1484 7.21876 16.1547 6.80626ZM8.55781 3.09376C9.31406 2.40626 10.3109 2.06251 11.3422 2.16563C13.1641 2.33751 14.6078 3.98751 14.6078 5.91251V6.70313H7.38906V5.67188C7.38906 4.70938 7.80156 3.78126 8.55781 3.09376ZM18.1141 17.2906C18.1141 18.7 16.9453 19.8688 15.5359 19.8688H6.46094C5.05156 19.8688 3.91719 18.7344 3.91719 17.325V11.0688C3.91719 9.52189 5.15469 8.28438 6.70156 8.28438H15.2953C16.8422 8.28438 18.1141 9.52188 18.1141 11V17.2906Z"
+                              fill=""
+                            />
+                            <path
+                              d="M10.9977 11.8594C10.5852 11.8594 10.207 12.2031 10.207 12.65V16.2594C10.207 16.6719 10.5508 17.05 10.9977 17.05C11.4102 17.05 11.7883 16.7063 11.7883 16.2594V12.6156C11.7883 12.2031 11.4102 11.8594 10.9977 11.8594Z"
+                              fill=""
+                            />
+                          </g>
+                        </svg>
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full cursor-pointer rounded-lg border default-border-color default-bg-color p-4 text-white transition hover:bg-opacity-90"
+                    disabled={isSubmitting || isLoading}
+                  >
+                    {isLoading ? <ButtonLoader /> : 'Login'}
+                  </button>
+                </Form>
               )}
             </Formik>
           </div>

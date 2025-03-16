@@ -34,6 +34,7 @@ import { EditUser } from './pages/Users/EditUser';
 import { GeneralSettings } from './pages/GeneralSettings/GeneralSettings';
 import SocialMedia from './pages/SocialMedia/SocialMedia';
 import { ContactUs } from './pages/ContactUs/ContactUs';
+import { AuthProvider } from './Auth/auth';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -48,200 +49,52 @@ function App() {
     setTimeout(() => setLoading(false), 1000);
   }, []);
 
-  return loading ? (
-    <Loader />
-  ) : token == null ? (
-    <>
+  return (
+    <AuthProvider>
+      {' '}
+      {/* ✅ Wraps the whole app */}
       <ToastContainer />
-      <div>
-        <PageTitle title="Signin | PTC Admin Dashboard" />
-
-        <SignIn />
-      </div>
-    </>
-  ) : (
-    <>
-      <ToastContainer />
-      <DefaultLayout>
-        <Routes>
-          <Route
-            index
-            element={
-              <>
-                <PageTitle title="PTC Admin Dashboard" />
-                <ECommerce />
-              </>
-            }
-          />
-          <Route
-            path="/Hero-section"
-            element={
-              <>
-                <PageTitle title="Hero Section | PTC - Admin Dashboard" />
-                <HeroSection />
-              </>
-            }
-          />
-          <Route
-            path="/Guarantee-Section"
-            element={
-              <>
-                <PageTitle title="Guarantee Section | PTC - Admin Dashboard" />
-                <GuaranteeSection />
-              </>
-            }
-          />
-          <Route
-            path="/Ad-Section"
-            element={
-              <>
-                <PageTitle title="Ad Section | PTC - Admin Dashboard" />
-                <AdSection />
-              </>
-            }
-          />
-
-          <Route
-            path="/projects"
-            element={
-              <>
-                <PageTitle title="Projects | PTC - Admin Dashboard" />
-                <Projects />
-              </>
-            }
-          />
-          <Route
-            path="/AddProject"
-            element={
-              <>
-                <PageTitle title="Add Project | PTC - Admin Dashboard" />
-                <AddProject />
-              </>
-            }
-          />
-          <Route
-            path="/EditProject/:id"
-            element={
-              <>
-                <PageTitle title="Edit Project | PTC - Admin Dashboard" />
-                <EditProject />
-              </>
-            }
-          />
-          <Route
-            path="/About-Us"
-            element={
-              <>
-                <PageTitle title="About Us | PTC - Admin Dashboard" />
-                <AboutUs />
-              </>
-            }
-          />
-          <Route
-            path="/Privacy-Policy"
-            element={
-              <>
-                <PageTitle title="Privacy Policy  | PTC - Admin Dashboard" />
-                <PrivacyPolicy />
-              </>
-            }
-          />
-          <Route
-            path="/ContactUs"
-            element={
-              <>
-                <PageTitle title="Contact Us  | PTC - Admin Dashboard" />
-                <ContactUs />
-              </>
-            }
-          />
-          <Route
-            path="/constructions"
-            element={
-              <>
-                <PageTitle title="Constructions Page  | PTC - Admin Dashboard" />
-                <Constructions />
-              </>
-            }
-          />
-          <Route
-            path="/development"
-            element={
-              <>
-                <PageTitle title="Developments Page  | PTC - Admin Dashboard" />
-                <Developments />
-              </>
-            }
-          />
-          <Route
-            path="/users"
-            element={
-              <>
-                <PageTitle title="Users Page  | PTC - Admin Dashboard" />
-                <Users />
-              </>
-            }
-          />
-          <Route
-            path="/AddUser"
-            element={
-              <>
-                <PageTitle title="Add User Page  | PTC - Admin Dashboard" />
-                <AddUser />
-              </>
-            }
-          />
-          <Route
-            path="/EditUser/:id"
-            element={
-              <>
-                <PageTitle title="Edit User | PTC - Admin Dashboard" />
-                <EditUser />
-              </>
-            }
-          />
-
-          <Route
-            path="/profile"
-            element={
-              <>
-                <PageTitle title="My Profile | PTC Admin Dashboard" />
-                <Settings />
-              </>
-            }
-          />
-          <Route
-            path="/general-settings"
-            element={
-              <>
-                <PageTitle title="General Settings | PTC Admin Dashboard" />
-                <GeneralSettings />
-              </>
-            }
-          />
-
-          <Route
-            path="/socailmedia"
-            element={
-              <>
-                <PageTitle title="Social Media | PTC Admin Dashboard" />
-                <SocialMedia />
-              </>
-            }
-          />
-
-          <Route
-            path="/auth/signin"
-            element={
-              <>
-                <PageTitle title="Signin | PTC Admin Dashboard" />
-                <SignIn />
-              </>
-            }
-          />
-        </Routes>
-      </DefaultLayout>
-    </>
+      {loading ? (
+        <Loader />
+      ) : token == null ? (
+        <div>
+          <PageTitle title="Signin | PTC Admin Dashboard" />
+          <SignIn />
+        </div>
+      ) : (
+        <DefaultLayout>
+          <Routes>
+            <Route
+              index
+              element={
+                <>
+                  <PageTitle title="PTC Admin Dashboard" />
+                  <ECommerce />
+                </>
+              }
+            />
+            <Route path="/Hero-section" element={<HeroSection />} />
+            <Route path="/Guarantee-Section" element={<GuaranteeSection />} />
+            <Route path="/Ad-Section" element={<AdSection />} />
+            <Route path="/projects" element={<Projects />} />
+            <Route path="/AddProject" element={<AddProject />} />
+            <Route path="/EditProject/:id" element={<EditProject />} />
+            <Route path="/About-Us" element={<AboutUs />} />
+            <Route path="/Privacy-Policy" element={<PrivacyPolicy />} />
+            <Route path="/ContactUs" element={<ContactUs />} />
+            <Route path="/constructions" element={<Constructions />} />
+            <Route path="/development" element={<Developments />} />
+            <Route path="/users" element={<Users />} />
+            <Route path="/AddUser" element={<AddUser />} />
+            <Route path="/EditUser/:id" element={<EditUser />} />
+            <Route path="/profile" element={<Settings />} />
+            <Route path="/general-settings" element={<GeneralSettings />} />
+            <Route path="/socailmedia" element={<SocialMedia />} />
+            <Route path="/auth/signin" element={<SignIn />} />
+          </Routes>
+        </DefaultLayout>
+      )}
+    </AuthProvider>
   );
 }
 

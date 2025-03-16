@@ -30,10 +30,6 @@ const SignIn: React.FC = () => {
   }) => {
     setIsLoading(true);
     try {
-      localStorage.removeItem('token');
-      localStorage.removeItem('fullName');
-      localStorage.removeItem('email');
-      localStorage.removeItem('id');
       const response = await API.post(END_POINTS.LOGIN, values);
       if (response?.data?.data) {
         const { accessToken, fullName, email, id } = response.data.data;
@@ -42,10 +38,11 @@ const SignIn: React.FC = () => {
         localStorage.setItem('fullName', fullName);
         localStorage.setItem('email', email);
         localStorage.setItem('id', id);
+        const user = { id, name: fullName, email, accessToken };
 
-        auth?.login(1);
+        localStorage.setItem('user', JSON.stringify(user));
+        auth?.login(user);
         navigate('/');
-        window.location.reload();
       } else {
         toast.error('Something went wrong');
       }
@@ -59,8 +56,8 @@ const SignIn: React.FC = () => {
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-h-screen">
-        <div className="hidden h-screen md:h-auto xl:block">
-          <div className="py-17.5 px-26 text-center">
+        <div className="hidden h-screen md:h-auto   sm:block md:block xs:block lg:block xl:block mx-auto">
+          <div className="  text-center">
             <Link className="inline-block" to="/">
               <img className="hidden dark:block h-30" src={Logo} alt="Logo" />
               <img className="dark:hidden h-30" src={Logo} alt="Logo" />

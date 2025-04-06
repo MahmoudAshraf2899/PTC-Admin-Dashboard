@@ -240,12 +240,12 @@ span.flatpickr-weekday,
     padding: 0 15px 15px 15px;
     color: #222;
   }
-  
+   
   .drag-text {
     margin-top: 15px;
     text-align: center;
   }
-  
+ 
   .drag-text h3 {
     color: var(--Black-01, #2C3659);
     text-align: center;

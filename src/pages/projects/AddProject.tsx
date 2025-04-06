@@ -10,6 +10,7 @@ import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
 import { BaseURL } from '../../constants/Bases.js';
 import imageCompression from 'browser-image-compression';
+import ProgressBar from '@ramonak/react-progress-bar';
 
 interface FilePreview {
   file: File;
@@ -28,7 +29,10 @@ const AddProject: React.FC = () => {
   const [fileProgress, setFileProgress] = useState({});
 
   const [isLoading, setIsLoading] = useState(false);
+  const [mainImageUID, setMainImageUID] = useState('');
+  const [mainImageName, setMainImageName] = useState('');
   const [projectTypeId, setProjectTypeId] = useState('1');
+  const [progress, setProgress] = useState(1);
   const [mediaUIDs, setMediaUIDs] = useState<string[]>([]);
 
   const [mainFile, setMainFile] = useState<File | null>(null);
@@ -160,8 +164,6 @@ const AddProject: React.FC = () => {
         }
       }),
     );
-
-    // setFiles((prevFiles) => [...prevFiles, ...newFiles]);
   };
 
   const onDropRejected = (fileRejections: any[]) => {
@@ -195,10 +197,18 @@ const AddProject: React.FC = () => {
     setShowOldMainImage(false); // Hide the old main image
   };
 
-  const readMainImageURL = (input: any) => {
+  const readMainImageURL = async (input: any) => {
     if (input.files && input.files[0]) {
-      const file = input.files[0];
+      setProgress(0);
+      let fakeProgress = 0;
+      let progressInterval: NodeJS.Timeout | null = null;
 
+      progressInterval = setInterval(() => {
+        fakeProgress += 5;
+        setProgress((prev) => (prev < 95 ? prev + 5 : prev)); // avoid reaching 100 early
+      }, 200); // update every 200ms
+      const file = input.files[0];
+      setMainImageName(file.name);
       // Check if the file is an image
       if (!file.type.startsWith('image/')) {
         toast.error('Please upload only image files.');
@@ -207,13 +217,68 @@ const AddProject: React.FC = () => {
       }
       const reader = new FileReader();
 
-      reader.onload = (e) => {
-        setImageUploadWrapClass('image-upload-wrap image-dropping');
-        setMainImageFileUploadContentVisible(true);
-        setMainFile(input.files[0]);
+      const options = {
+        maxSizeMB: 1, // Reduce file size to 1MB
+        maxWidthOrHeight: 1920, // Resize large images
+        useWebWorker: true, // Improve performance
       };
 
-      reader.readAsDataURL(input.files[0]);
+      try {
+        const blobFile = await imageCompression(file, options);
+        const compressedFile = new File([blobFile], file.name, {
+          type: file.type,
+          lastModified: Date.now(),
+        });
+
+        const formData = new FormData();
+        formData.append('file', compressedFile);
+
+        const data = {
+          File: compressedFile,
+          MediaType: file.type.includes('image') ? 1 : 2,
+          Directory: 8,
+        };
+        setFileProgress((prevProgress) => ({
+          ...prevProgress,
+          [file.name]: 'uploading',
+        }));
+        const mediaResponse = await axios.post(
+          `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`,
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              'Content-Type': 'multipart/form-data',
+            },
+          },
+        );
+
+        if (mediaResponse.status === 200) {
+          setMainImageUID(mediaResponse.data.id);
+          if (progressInterval) clearInterval(progressInterval);
+          setProgress(100);
+          setFileProgress((prevProgress) => ({
+            ...prevProgress,
+            [file.name]: 'uploaded',
+          }));
+          reader.onload = (e) => {
+            setImageUploadWrapClass('image-upload-wrap image-dropping');
+            setMainImageFileUploadContentVisible(true);
+            setMainFile(input.files[0]);
+          };
+
+          reader.readAsDataURL(input.files[0]);
+        }
+      } catch (error) {
+        console.error('Upload failed:', error);
+      } finally {
+        if (progressInterval) clearInterval(progressInterval);
+        setProgress(100);
+        setFileProgress((prevProgress) => ({
+          ...prevProgress,
+          [file.name]: 'uploaded',
+        }));
+      }
     } else {
       removeUpload();
     }
@@ -235,42 +300,10 @@ const AddProject: React.FC = () => {
 
   const handleAddProject = async (values: any) => {
     setIsLoading(true);
+    console.log('Main Image :', mainImageUID);
 
     try {
-      const options = {
-        maxSizeMB: 1, // Reduce file size to 1MB
-        maxWidthOrHeight: 1920, // Resize large images
-        useWebWorker: true, // Improve performance
-      };
-      const blobFile = await imageCompression(mainFile, options);
-      const compressedFile = new File([blobFile], mainFile.name, {
-        type: mainFile.type,
-        lastModified: Date.now(),
-      });
-      // Second: Upload the main image
-      const mainImageData = {
-        File: compressedFile,
-        MediaType: 1,
-        Directory: 8,
-      };
-
-      const mainImageResponse = await axios.post(
-        `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`,
-        mainImageData,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'multipart/form-data',
-          },
-        },
-      );
-
-      let mainImageUID = '';
-      if (mainImageResponse.status === 200) {
-        mainImageUID = mainImageResponse.data.id;
-      }
-
-      // Third: Add the project
+      // Add the project
       const requestObject = {
         title: values.title,
         description: values.description,
@@ -608,18 +641,26 @@ const AddProject: React.FC = () => {
                             <p>(max, 700 X 700px)</p>
                           </div>
                         </div>
+
                         {/* New Uploaded Photo Preview */}
                         <div className="w-f mb-5.5 block">
-                          {mainImageFileUploadContentVisible && mainFile && (
-                            <div className="mb-3">
-                              <div className="file-upload-content !min-w-36 !min-h-29">
-                                <img
-                                  className="m-auto h-60 w-60"
-                                  src={URL.createObjectURL(mainFile)}
-                                  alt="your"
-                                />
-                              </div>
-                            </div>
+                          {fileProgress[mainImageName] === 'uploading' ? (
+                            <ProgressBar completed={progress} />
+                          ) : (
+                            <>
+                              {mainImageFileUploadContentVisible &&
+                                mainFile && (
+                                  <div className="mb-3">
+                                    <div className="file-upload-content !min-w-36 !min-h-29">
+                                      <img
+                                        className="m-auto h-60 w-60"
+                                        src={URL.createObjectURL(mainFile)}
+                                        alt="your"
+                                      />
+                                    </div>
+                                  </div>
+                                )}
+                            </>
                           )}
                         </div>
                       </>

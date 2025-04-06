@@ -11,6 +11,7 @@ import { BaseURL } from '../../constants/Bases.js';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 import { useDropzone } from 'react-dropzone';
 import imageCompression from 'browser-image-compression';
+import ProgressBar from '@ramonak/react-progress-bar';
 
 interface FilePreview {
   file: File;
@@ -56,7 +57,10 @@ export const EditProject = () => {
   const navigate = useNavigate();
   const [files, setFiles] = useState<FilePreview[]>([]);
   const [file, setFile] = useState<File | null>(null);
+  const [mainImageName, setMainImageName] = useState('');
+
   const [mediaUIDs, setMediaUIDs] = useState<string[]>([]);
+  const [progress, setProgress] = useState(1);
 
   const [mainImageUID, setMainImageUID] = useState('');
   const [mainImageUrl, setMainImageUrl] = useState('');
@@ -119,31 +123,31 @@ export const EditProject = () => {
     console.log('mediaUIDs :', mediaUIDs);
     try {
       // Second: Upload the main image if changed
-      if (showOldMainImage == false && mainFile != null) {
-        const mainImageData = {
-          File: mainFile,
-          MediaType: 1,
-          Directory: 8,
-        };
-        const mainImageResponse = await axios.post(
-          `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`,
-          mainImageData,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
-              'Content-Type': 'multipart/form-data',
-            },
-          },
-        );
+      // if (showOldMainImage == false && mainFile != null) {
+      //   const mainImageData = {
+      //     File: mainFile,
+      //     MediaType: 1,
+      //     Directory: 8,
+      //   };
+      //   const mainImageResponse = await axios.post(
+      //     `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`,
+      //     mainImageData,
+      //     {
+      //       headers: {
+      //         Authorization: `Bearer ${localStorage.getItem('token')}`,
+      //         'Content-Type': 'multipart/form-data',
+      //       },
+      //     },
+      //   );
 
-        let mainImageUID = '';
-        if (mainImageResponse.status === 200) {
-          mainImageUID = mainImageResponse.data.id;
-          setMainImageUID(mainImageUID);
-          ImageUrl = mainImageResponse.data.path;
-          setMainImageUrl(mainImageResponse.data.path);
-        }
-      }
+      //   let mainImageUID = '';
+      //   if (mainImageResponse.status === 200) {
+      //     mainImageUID = mainImageResponse.data.id;
+      //     setMainImageUID(mainImageUID);
+      //     ImageUrl = mainImageResponse.data.path;
+      //     setMainImageUrl(mainImageResponse.data.path);
+      //   }
+      // }
 
       //Third Update Project
       const data = {
@@ -328,19 +332,88 @@ export const EditProject = () => {
     setImageUploadWrapClass('image-upload-wrap');
     setFileUploadContentVisible(false);
   };
-  const readURL = (input: any) => {
+  const readURL = async (input: any) => {
     if (input.files && input.files[0]) {
+      setProgress(0);
+      let fakeProgress = 0;
+      let progressInterval: NodeJS.Timeout | null = null;
+
+      progressInterval = setInterval(() => {
+        fakeProgress += 5;
+        setProgress((prev) => (prev < 95 ? prev + 5 : prev)); // avoid reaching 100 early
+      }, 200); // update every 200ms
+      const file = input.files[0];
+      setMainImageName(file.name);
+      // Check if the file is an image
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please upload only image files.');
+        removeUpload();
+        return;
+      }
       const reader = new FileReader();
 
-      reader.onload = (e) => {
-        setImageUploadWrapClass('image-upload-wrap image-dropping');
-        setFileUploadContentVisible(true);
-        setMainFile(input.files[0]);
-
-        setFile(input.files[0]);
+      const options = {
+        maxSizeMB: 1, // Reduce file size to 1MB
+        maxWidthOrHeight: 1920, // Resize large images
+        useWebWorker: true, // Improve performance
       };
 
-      reader.readAsDataURL(input.files[0]);
+      try {
+        const blobFile = await imageCompression(file, options);
+        const compressedFile = new File([blobFile], file.name, {
+          type: file.type,
+          lastModified: Date.now(),
+        });
+
+        const formData = new FormData();
+        formData.append('file', compressedFile);
+
+        const data = {
+          File: compressedFile,
+          MediaType: file.type.includes('image') ? 1 : 2,
+          Directory: 8,
+        };
+        setFileProgress((prevProgress) => ({
+          ...prevProgress,
+          [file.name]: 'uploading',
+        }));
+        const mediaResponse = await axios.post(
+          `${BaseURL.SmarterAspNetBase}${END_POINTS.ADD_MEDIA}`,
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              'Content-Type': 'multipart/form-data',
+            },
+          },
+        );
+
+        if (mediaResponse.status === 200) {
+          setMainImageUID(mediaResponse.data.id);
+          if (progressInterval) clearInterval(progressInterval);
+          setProgress(100);
+          setFileProgress((prevProgress) => ({
+            ...prevProgress,
+            [file.name]: 'uploaded',
+          }));
+          reader.onload = (e) => {
+            setImageUploadWrapClass('image-upload-wrap image-dropping');
+            setMainImageFileUploadContentVisible(true);
+            setMainFile(input.files[0]);
+          };
+
+          reader.readAsDataURL(input.files[0]);
+        }
+      } catch (error) {
+        console.error('Upload failed:', error);
+      } finally {
+        if (progressInterval) clearInterval(progressInterval);
+        setProgress(100);
+        setFileProgress((prevProgress) => ({
+          ...prevProgress,
+          [file.name]: 'uploaded',
+        }));
+      }
     } else {
       removeUpload();
     }
@@ -717,16 +790,23 @@ export const EditProject = () => {
                             </div>
                             {/* New Uploaded Photo Preview */}
                             <div className="w-f mb-5.5 block">
-                              {fileUploadContentVisible && file && (
-                                <div className="mb-3">
-                                  <div className="file-upload-content">
-                                    <img
-                                      className="file-upload-image h-800 w-80"
-                                      src={URL.createObjectURL(file)}
-                                      alt="your"
-                                    />
-                                  </div>
-                                </div>
+                              {fileProgress[mainImageName] === 'uploading' ? (
+                                <ProgressBar completed={progress} />
+                              ) : (
+                                <>
+                                  {mainImageFileUploadContentVisible &&
+                                    mainFile && (
+                                      <div className="mb-3">
+                                        <div className="file-upload-content !min-w-36 !min-h-29">
+                                          <img
+                                            className="m-auto h-60 w-60"
+                                            src={URL.createObjectURL(mainFile)}
+                                            alt="your"
+                                          />
+                                        </div>
+                                      </div>
+                                    )}
+                                </>
                               )}
                             </div>
                           </>

@@ -30,6 +30,7 @@ export const END_POINTS = {
   UPDATE_PROFILE: 'api/User/UpdateProfile',
   INTRO_VIDEO: 'api/admin/AppSetting/introduction_video',
   PHONE_NUMBER: 'api/admin/AppSetting/phone',
+  PHONE_NUMBER_TWO: 'api/admin/AppSetting/phoneTwo',
   LOCATION: 'api/admin/AppSetting/location',
   GOOGLE_MAPS_LOCATION: 'api/admin/AppSetting/google_maps_location',
   FOOTER_EMAIL: 'api/admin/AppSetting/footer_email',

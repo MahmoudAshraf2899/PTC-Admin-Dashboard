@@ -27,6 +27,9 @@ const PhoneNumberValidationSchema = Yup.object({
   phone: Yup.string()
     .required('Phone number is required')
     .matches(/^\d{11}$/, 'Phone number must be exactly 11 digits'),
+  phoneTwo: Yup.string()
+    .required('Phone number is required')
+    .matches(/^\d{11}$/, 'Phone number must be exactly 11 digits'),
 });
 const FooterTitleValidationSchema = Yup.object({
   title: Yup.string()
@@ -76,6 +79,8 @@ export const GeneralSettings = () => {
 
   const [phoneNumberResponse, setPhoneNumberResponse] =
     useState<ApiResponse | null>(null);
+  const [phoneNumberResponseTwo, setPhoneNumberResponseTwo] =
+    useState<ApiResponse | null>(null);
   const [footerTitleResponse, setFooterTitleResponse] =
     useState<ApiResponse | null>(null);
   const [locationResponse, setLocationResponse] = useState<ApiResponse | null>(
@@ -98,6 +103,7 @@ export const GeneralSettings = () => {
     setIsLoading(true);
     fetchData(END_POINTS.INTRO_VIDEO, setIntroductionVideoResponse);
     fetchData(END_POINTS.PHONE_NUMBER, setPhoneNumberResponse);
+    fetchData(END_POINTS.PHONE_NUMBER_TWO, setPhoneNumberResponseTwo);
     fetchData(END_POINTS.LOCATION, setLocationResponse);
     fetchData(END_POINTS.GOOGLE_MAPS_LOCATION, setGoogleMapsResponse);
     fetchData(END_POINTS.FOOTER_EMAIL, setFooterEmailResponse);
@@ -347,25 +353,39 @@ export const GeneralSettings = () => {
     setIsLoading(true);
 
     try {
-      let payload = {
+      const payload = {
         key: 'phone',
         value: values.phone,
       };
-      setIsLoading(true);
+      const payloadTwo = {
+        key: 'phoneTwo',
+        value: values.phoneTwo,
+      };
 
-      await API.put(`${END_POINTS.UPDATE_GENERAL_SETTINGS}`, payload).then(
-        (res) => {
-          setIsLoading(true);
-          if (res.status == 200) {
-            toast.success('Operation completed successfully');
-            navigate('/');
-          } else {
-            toast.error(res.data.message);
-          }
-        },
+      const res1 = await API.put(
+        `${END_POINTS.UPDATE_GENERAL_SETTINGS}`,
+        payload,
       );
-    } catch (error) {
-      setIsLoading(false);
+
+      if (res1.status !== 200) {
+        toast.error(res1.data.message);
+        return;
+      }
+
+      // Second API call
+      const res2 = await API.put(
+        `${END_POINTS.UPDATE_GENERAL_SETTINGS}`,
+        payloadTwo,
+      );
+
+      if (res2.status === 200) {
+        toast.success('Operation completed successfully');
+        navigate('/');
+      } else {
+        toast.error(res2.data.message);
+      }
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'An error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -812,6 +832,7 @@ export const GeneralSettings = () => {
                   enableReinitialize
                   initialValues={{
                     phone: phoneNumberResponse?.value,
+                    phoneTwo: phoneNumberResponseTwo?.value,
                   }}
                   key={`PhoneNumber`}
                   validationSchema={PhoneNumberValidationSchema}
@@ -850,6 +871,31 @@ export const GeneralSettings = () => {
                               {touched.phone && errors.phone && (
                                 <div className="text-red-500 text-sm mt-1">
                                   {errors.phone}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          {/* Phone Number 2 */}
+                          <div>
+                            <label className="mb-2 block text-sm font-medium text-black dark:text-white">
+                              Phone Number Two
+                            </label>
+                            <div className="relative">
+                              <input
+                                className="w-full rounded border border-stroke bg-gray py-3 px-4 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
+                                type="text"
+                                name="phoneTwo"
+                                id="phoneTwo"
+                                onChange={(e) => {
+                                  handleChange(e);
+                                  setFieldValue('phoneTwo', e.target.value); // Ensure Formik state updates
+                                }}
+                                onBlur={handleBlur}
+                                value={values.phoneTwo}
+                              />
+                              {touched.phoneTwo && errors.phoneTwo && (
+                                <div className="text-red-500 text-sm mt-1">
+                                  {errors.phoneTwo}
                                 </div>
                               )}
                             </div>
